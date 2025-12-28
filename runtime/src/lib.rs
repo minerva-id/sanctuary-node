@@ -8,6 +8,103 @@ pub mod apis;
 mod benchmarks;
 pub mod configs;
 
+// ═══════════════════════════════════════════════════════════════════════════
+// THE SANCTUARY CONSTANT - Economic DNA of the Protocol
+// ═══════════════════════════════════════════════════════════════════════════
+// 
+// "Mathematics-as-Money" - Supply derived from universal constants, not human decisions.
+//
+// Reference: Yellow Paper Chapter 2 - The Sanctuary Constant (Economic Primitives)
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Universal mathematical constants that govern Sanctuary's economic model.
+/// 
+/// These constants are immutable and represent the fundamental properties of nature:
+/// - π (Pi): The ratio of a circle's circumference to its diameter - represents CYCLES
+/// - e (Euler's number): The base of natural logarithm - represents GROWTH  
+/// - φ (Phi/Golden Ratio): The divine proportion - represents PROPORTION
+///
+/// All values are stored as fixed-point integers with 9 decimal precision (× 10^9)
+/// to ensure deterministic computation on-chain without floating-point arithmetic.
+pub mod sanctuary_constants {
+    use super::Balance;
+
+    /// Precision factor for fixed-point arithmetic (10^9)
+    pub const PRECISION: u128 = 1_000_000_000;
+
+    /// π (Pi) - Archimedes' constant ≈ 3.141592653
+    /// Represents cycles, periodicity, and the eternal return
+    pub const PI: u128 = 3_141_592_653;
+
+    /// e (Euler's number) - The natural exponential base ≈ 2.718281828  
+    /// Represents organic growth and continuous compounding
+    pub const E: u128 = 2_718_281_828;
+
+    /// φ (Phi) - The Golden Ratio ≈ 1.618033988
+    /// Represents perfect proportion and natural harmony
+    pub const PHI: u128 = 1_618_033_988;
+
+    /// The Sanctuary Constant: π × e × φ ≈ 13.817422188
+    /// This represents the "Volume Ideal" - a theoretical block with sides π, e, and φ
+    pub const SANCTUARY_CONSTANT: u128 = 13_817_422_188;
+
+    /// Maximum Supply of $SANC tokens (in whole units)
+    /// S_max = floor(π × e × φ × 10^6) = 13,817,422 SANC
+    /// 
+    /// This is the asymptotic limit that supply approaches as time → ∞
+    /// Unlike Bitcoin's hard cap, this is approached via sigmoid curve, never abruptly reached.
+    pub const MAX_SUPPLY_UNITS: u128 = 13_817_422;
+
+    /// Maximum Supply in smallest indivisible units (planck)
+    /// 13,817,422 SANC × 10^18 decimals = 13,817,422 × 10^18 planck
+    /// 
+    /// We use 18 decimals for EVM compatibility (like ETH's wei)
+    pub const MAX_SUPPLY: Balance = 13_817_422_000_000_000_000_000_000;
+
+    /// Token decimals (18 for EVM compatibility)
+    pub const TOKEN_DECIMALS: u8 = 18;
+
+    /// Token symbol
+    pub const TOKEN_SYMBOL: &str = "SANC";
+
+    /// Token name
+    pub const TOKEN_NAME: &str = "Sanctuary";
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // GENESIS DISTRIBUTION
+    // ═══════════════════════════════════════════════════════════════════════
+    // 
+    // For development/testnet, we pre-mint a portion of supply.
+    // On mainnet, tokens should be emitted via the Sigmoid curve over time.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// Genesis supply for development (10% of max supply)
+    /// 1,381,742.2 SANC × 10^18 = 1,381,742_200_000_000_000_000_000
+    pub const GENESIS_SUPPLY: Balance = 1_381_742_200_000_000_000_000_000;
+
+    /// Endowment per development account
+    /// ~345,435.55 SANC each for 4 dev accounts (Alice, Bob, AliceStash, BobStash)
+    pub const DEV_ENDOWMENT: Balance = 345_435_550_000_000_000_000_000;
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // SIGMOID EMISSION PARAMETERS
+    // ═══════════════════════════════════════════════════════════════════════
+
+    /// Growth rate constant (k) for sigmoid curve
+    /// This controls how fast the S-curve transitions from slow → fast → slow
+    /// Value: 0.0001 represented as fixed-point (0.0001 × 10^9 = 100_000)
+    pub const GROWTH_RATE_K: u128 = 100_000;
+
+    /// Inflection point (t_0) in block numbers
+    /// This is when 50% of supply will have been emitted
+    /// Target: ~10.5 years at 6-second blocks = 55,296,000 blocks
+    pub const INFLECTION_POINT_T0: u64 = 55_296_000;
+
+    /// Blocks per year (at 6 second block time)
+    /// 365.25 days × 24 hours × 60 min × 10 blocks/min = 5,259,600 blocks/year
+    pub const BLOCKS_PER_YEAR: u64 = 5_259_600;
+}
+
 extern crate alloc;
 use alloc::vec::Vec;
 use sp_runtime::{
@@ -98,13 +195,28 @@ pub const DAYS: BlockNumber = HOURS * 24;
 
 pub const BLOCK_HASH_COUNT: BlockNumber = 2400;
 
-// Unit = the base number of indivisible units for balances
-pub const UNIT: Balance = 1_000_000_000_000;
-pub const MILLI_UNIT: Balance = 1_000_000_000;
-pub const MICRO_UNIT: Balance = 1_000_000;
+// ═══════════════════════════════════════════════════════════════════════════
+// TOKEN UNITS - 18 decimals for EVM compatibility
+// ═══════════════════════════════════════════════════════════════════════════
+// 1 SANC = 10^18 planck (smallest unit)
+// This matches Ethereum's wei/ether ratio for seamless EVM integration
 
-/// Existential deposit.
-pub const EXISTENTIAL_DEPOSIT: Balance = MILLI_UNIT;
+/// One SANC token = 10^18 planck (smallest indivisible unit)
+pub const SANC: Balance = 1_000_000_000_000_000_000; // 10^18
+pub const MILLI_SANC: Balance = 1_000_000_000_000_000; // 10^15
+pub const MICRO_SANC: Balance = 1_000_000_000_000; // 10^12
+
+// Legacy aliases for compatibility
+pub const UNIT: Balance = SANC;
+pub const MILLI_UNIT: Balance = MILLI_SANC;
+pub const MICRO_UNIT: Balance = MICRO_SANC;
+
+/// Existential deposit - minimum balance to keep account alive
+/// Set to 1 SANC to prevent dust accounts and encourage meaningful participation
+pub const EXISTENTIAL_DEPOSIT: Balance = SANC;
+
+// Re-export sanctuary constants for external use
+pub use sanctuary_constants::*;
 
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
