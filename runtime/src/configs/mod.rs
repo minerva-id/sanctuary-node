@@ -164,66 +164,47 @@ impl pallet_template::Config for Runtime {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TOKENOMICS PALLET CONFIGURATION
-// ═══════════════════════════════════════════════════════════════════════════
-//
-// Implements the Sigmoid Emission Curve and Adaptive Scarcity Mechanism
-// from the Yellow Paper (Chapters 2 & 3).
-//
-// Key Parameters:
-// - Growth Rate (k): Controls curve steepness
-// - Inflection Point (t_0): When 50% supply is emitted
-// - Time Dilation Alpha: Sensitivity to network activity
+// AUTHORSHIP PALLET - Required for finding block author
 // ═══════════════════════════════════════════════════════════════════════════
 
-parameter_types! {
-	/// Treasury account for receiving portion of block rewards
-	pub TreasuryAccount: AccountId = AccountId::from([0u8; 32]);
-	
-	/// Treasury cut: 10% of block rewards go to treasury
-	pub const TreasuryCut: Perbill = Perbill::from_percent(10);
-	
-	/// Blocks per era for ASM updates (1 day at 6s blocks = 14400 blocks)
-	pub const BlocksPerEra: BlockNumber = 14_400;
-	
-	/// Growth rate constant (k) for sigmoid curve
-	/// k = 0.0000005 represented as k × 10^12 = 500_000_000
-	/// This gives ~21 year emission schedule
-	pub const GrowthRateK: u128 = 500_000_000;
-	
-	/// Inflection point (t_0) - block number when 50% supply is emitted
-	/// ~10.5 years at 6s blocks = 55,296,000 blocks
-	pub const InflectionPoint: BlockNumber = 55_296_000;
-	
-	/// Time dilation sensitivity (α) = 0.05 as α × 10^12 = 50_000_000_000
-	pub const TimeDilationAlpha: u128 = 50_000_000_000;
-	
-	/// Baseline network activity quotient
-	pub const BaselineActivity: u128 = 1_000_000_000_000; // 1.0 × 10^12
-}
-
-/// Handler for newly minted tokens - distributes to appropriate places
-pub struct TokenMintedHandler;
-impl frame_support::traits::OnUnbalanced<
-	pallet_balances::NegativeImbalance<Runtime>
-> for TokenMintedHandler {
-	fn on_nonzero_unbalanced(amount: pallet_balances::NegativeImbalance<Runtime>) {
-		// For now, drop the imbalance (tokens are effectively destroyed)
-		// In production, this would distribute to validators
-		drop(amount);
+/// Converts Aura AuthorityId to AccountId for authorship tracking
+pub struct AuraAccountAdapter;
+impl frame_support::traits::FindAuthor<AccountId> for AuraAccountAdapter {
+	fn find_author<'a, I>(digests: I) -> Option<AccountId>
+	where
+		I: 'a + IntoIterator<Item = (frame_support::ConsensusEngineId, &'a [u8])>,
+	{
+		pallet_aura::AuraAuthorId::<Runtime>::find_author(digests)
+			.map(|aura_id| {
+				// AuraId is sr25519::Public which wraps CryptoBytes<32>
+				// We extract the 32-byte public key and convert to AccountId
+				use sp_core::crypto::ByteArray;
+				let raw: &[u8] = aura_id.as_slice();
+				let mut bytes = [0u8; 32];
+				bytes.copy_from_slice(&raw[..32]);
+				AccountId::from(bytes)
+			})
 	}
 }
 
-impl pallet_tokenomics::Config for Runtime {
+impl pallet_authorship::Config for Runtime {
+	type FindAuthor = AuraAccountAdapter;
+	type EventHandler = ();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EMISSION PALLET CONFIGURATION (v2.0 - Stateless)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Simple pre-computed sigmoid emission curve.
+// No storage, no complex ASM - just lookup and mint.
+//
+// Emission is distributed to block author (validator) on each block.
+// ═══════════════════════════════════════════════════════════════════════════
+
+impl pallet_emission::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
-	type OnTokensMinted = TokenMintedHandler;
-	type TreasuryAccount = TreasuryAccount;
-	type TreasuryCut = TreasuryCut;
-	type BlocksPerEra = BlocksPerEra;
-	type GrowthRateK = GrowthRateK;
-	type InflectionPoint = InflectionPoint;
-	type TimeDilationAlpha = TimeDilationAlpha;
-	type BaselineActivity = BaselineActivity;
-	type WeightInfo = pallet_tokenomics::weights::SubstrateWeight<Runtime>;
+	type FindAuthor = AuraAccountAdapter;
+	type WeightInfo = ();
 }

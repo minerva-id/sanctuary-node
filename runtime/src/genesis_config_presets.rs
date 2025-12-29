@@ -51,15 +51,11 @@ fn sanctuary_genesis(
     root: AccountId,
 ) -> Value {
     // Calculate per-account endowment
-    let num_accounts = endowed_accounts.len() as u128;
-    let per_account = if num_accounts > 0 {
+    let per_account = if !endowed_accounts.is_empty() {
         DEV_ENDOWMENT
     } else {
         0
     };
-
-    // Calculate total genesis supply (sum of all endowments)
-    let total_genesis: u128 = num_accounts.saturating_mul(per_account);
 
     build_struct_json_patch!(RuntimeGenesisConfig {
         balances: BalancesConfig {
@@ -76,11 +72,7 @@ fn sanctuary_genesis(
             authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
         },
         sudo: SudoConfig { key: Some(root) },
-        // Initialize tokenomics with genesis supply tracking
-        tokenomics: pallet_tokenomics::GenesisConfig {
-            initial_supply: total_genesis,
-            initial_effective_height: 0,
-        },
+        // Note: pallet-emission is stateless - no genesis config needed
     })
 }
 

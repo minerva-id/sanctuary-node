@@ -10,7 +10,7 @@ description = "Sanctuary Protocol - Adaptive Scarcity & Quantum-Resistant Blockc
 members = [
     "node",
     "pallets/template",
-    "pallets/tokenomics",
+    "pallets/emission",
     "runtime",
 ]
 resolver = "2"
@@ -18,7 +18,7 @@ resolver = "2"
 [workspace.dependencies]
 sanctuary-runtime = { path = "./runtime", default-features = false }
 pallet-template = { path = "./pallets/template", default-features = false }
-pallet-tokenomics = { path = "./pallets/tokenomics", default-features = false }
+pallet-emission = { path = "./pallets/emission", default-features = false }
 clap = { version = "4.5.13" }
 frame-benchmarking-cli = { version = "47.0.0", default-features = false }
 frame-metadata-hash-extension = { version = "0.8.0", default-features = false }
@@ -61,6 +61,7 @@ frame-system-benchmarking = { version = "40.0.0", default-features = false }
 frame-system-rpc-runtime-api = { version = "36.0.0", default-features = false }
 frame-try-runtime = { version = "0.46.0", default-features = false }
 pallet-aura = { version = "39.0.0", default-features = false }
+pallet-authorship = { version = "40.0.0", default-features = false }
 pallet-balances = { version = "41.1.0", default-features = false }
 pallet-grandpa = { version = "40.0.0", default-features = false }
 pallet-sudo = { version = "40.0.0", default-features = false }

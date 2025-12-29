@@ -338,7 +338,11 @@ mod runtime {
 	#[runtime::pallet_index(7)]
 	pub type Template = pallet_template;
 
-	// Sanctuary Protocol Tokenomics - Sigmoid Emission & Adaptive Scarcity
+	// Block authorship tracking (required for emission)
 	#[runtime::pallet_index(8)]
-	pub type Tokenomics = pallet_tokenomics;
+	pub type Authorship = pallet_authorship;
+
+	// Sanctuary Protocol Emission - Pre-computed Sigmoid Curve (v2.0)
+	#[runtime::pallet_index(9)]
+	pub type Emission = pallet_emission;
 }
