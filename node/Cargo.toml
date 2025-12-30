@@ -80,6 +80,19 @@ sp-timestamp.workspace = true
 substrate-frame-rpc-system.default-features = true
 substrate-frame-rpc-system.workspace = true
 
+# Cumulus (for EVM proof size host function)
+cumulus-primitives-proof-size-hostfunction = { path = "/home/minerva/polkadot-sdk/cumulus/primitives/proof-size-hostfunction" }
+
+# TODO: Add Frontier RPC in next phase for full Metamask compatibility
+# fc-rpc.workspace = true
+# fc-rpc-core.workspace = true
+# fc-mapping-sync.workspace = true
+# fc-db.workspace = true
+# fc-storage.workspace = true
+# fp-rpc.workspace = true
+# fp-evm.workspace = true
+# pallet-ethereum.workspace = true
+
 [build-dependencies]
 substrate-build-script-utils.default-features = true
 substrate-build-script-utils.workspace = true

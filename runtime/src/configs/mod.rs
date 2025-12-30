@@ -42,7 +42,7 @@ use sp_version::RuntimeVersion;
 use super::{
 	AccountId, Aura, Balance, Balances, Block, BlockNumber, Hash, Nonce, PalletInfo, Runtime,
 	RuntimeCall, RuntimeEvent, RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask,
-	System, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
+	System, Timestamp, EXISTENTIAL_DEPOSIT, SLOT_DURATION, VERSION,
 };
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
@@ -207,4 +207,245 @@ impl pallet_emission::Config for Runtime {
 	type Currency = Balances;
 	type FindAuthor = AuraAccountAdapter;
 	type WeightInfo = ();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// EVM CONFIGURATION (Frontier Integration)
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Chain ID: 7777 (Sanctuary Network)
+// Features: Full EVM compatibility, EIP-1559 base fee
+// ═══════════════════════════════════════════════════════════════════════════
+
+use pallet_evm::{
+	AddressMapping, IsPrecompileResult,
+	Precompile, PrecompileHandle, PrecompileResult, PrecompileSet,
+};
+use sp_core::{H160, U256};
+use core::marker::PhantomData;
+use sp_runtime::Permill;
+
+/// Sanctuary Chain ID: 7777
+pub const CHAIN_ID: u64 = 7777;
+
+/// Block gas limit
+pub const BLOCK_GAS_LIMIT: u64 = 75_000_000;
+
+/// Weight per millisecond (approximation)
+pub const WEIGHT_MILLISECS_PER_BLOCK: u64 = 2000 * WEIGHT_REF_TIME_PER_SECOND / 1000;
+
+parameter_types! {
+	/// Block gas limit
+	pub BlockGasLimit: U256 = U256::from(BLOCK_GAS_LIMIT);
+	/// Gas/PoV ratio
+	pub const GasLimitPovSizeRatio: u64 = 4;
+	/// Storage growth ratio
+	pub const GasLimitStorageGrowthRatio: u64 = 4;
+	/// Weight per gas unit
+	pub WeightPerGas: Weight = Weight::from_parts(
+		fp_evm::weight_per_gas(BLOCK_GAS_LIMIT, NORMAL_DISPATCH_RATIO, WEIGHT_MILLISECS_PER_BLOCK),
+		0
+	);
+	/// Default base fee per gas (1 Gwei in wei)
+	pub DefaultBaseFeePerGas: U256 = U256::from(1_000_000_000);
+	/// Default elasticity (12.5% as per EIP-1559)
+	pub DefaultElasticity: Permill = Permill::from_parts(125_000);
+	/// Quick clear limit
+	pub const SuicideQuickClearLimit: u32 = 0;
+	/// Post log content: block and txn hashes
+	pub const PostBlockAndTxnHashes: pallet_ethereum::PostLogContent = pallet_ethereum::PostLogContent::BlockAndTxnHashes;
+	/// Min gas price bound divisor
+	pub BoundDivision: U256 = U256::from(1024);
+}
+
+/// Custom address mapping: H160 -> AccountId32
+/// Pads H160 (20 bytes) with zeros to create AccountId32 (32 bytes)
+pub struct HashedAddressMapping;
+impl AddressMapping<AccountId> for HashedAddressMapping {
+	fn into_account_id(address: H160) -> AccountId {
+		let mut data = [0u8; 32];
+		data[0..20].copy_from_slice(&address[..]);
+		AccountId::from(data)
+	}
+}
+
+/// Get account from H160 address
+pub struct FindAuthorTruncated<F>(PhantomData<F>);
+impl<F: frame_support::traits::FindAuthor<AccountId>> frame_support::traits::FindAuthor<H160>
+	for FindAuthorTruncated<F>
+{
+	fn find_author<'a, I>(digests: I) -> Option<H160>
+	where
+		I: 'a + IntoIterator<Item = (frame_support::ConsensusEngineId, &'a [u8])>,
+	{
+		F::find_author(digests).map(|account| {
+			let bytes: [u8; 32] = account.into();
+			let mut h160_bytes = [0u8; 20];
+			h160_bytes.copy_from_slice(&bytes[0..20]);
+			H160::from(h160_bytes)
+		})
+	}
+}
+
+/// Custom EnsureAddressOrigin that allows any signed account to interact with EVM
+/// Maps H160 address to AccountId32 and verifies the signer matches
+pub struct EnsureAddressTruncated;
+
+impl<OuterOrigin> pallet_evm::EnsureAddressOrigin<OuterOrigin> for EnsureAddressTruncated
+where
+	OuterOrigin: Into<Result<frame_system::RawOrigin<AccountId>, OuterOrigin>> + Clone,
+{
+	type Success = AccountId;
+
+	fn try_address_origin(address: &H160, origin: OuterOrigin) -> Result<AccountId, OuterOrigin> {
+		origin.clone().into().and_then(|o| match o {
+			frame_system::RawOrigin::Signed(who) => {
+				// Convert AccountId to H160 and compare
+				let who_bytes: [u8; 32] = who.clone().into();
+				let mut who_h160 = [0u8; 20];
+				who_h160.copy_from_slice(&who_bytes[0..20]);
+				if H160::from(who_h160) == *address {
+					Ok(who)
+				} else {
+					Err(origin)
+				}
+			}
+			_ => Err(origin),
+		})
+	}
+}
+
+/// Standard Ethereum precompiles
+pub struct SanctuaryPrecompiles<R>(PhantomData<R>);
+
+impl<R> SanctuaryPrecompiles<R>
+where
+	R: pallet_evm::Config,
+{
+	pub fn new() -> Self {
+		Self(PhantomData)
+	}
+
+	pub fn used_addresses() -> [H160; 5] {
+		[
+			hash(1),  // ECRecover
+			hash(2),  // Sha256
+			hash(3),  // Ripemd160
+			hash(4),  // Identity
+			hash(5),  // Modexp
+		]
+	}
+}
+
+impl<R> Default for SanctuaryPrecompiles<R>
+where
+	R: pallet_evm::Config,
+{
+	fn default() -> Self {
+		Self::new()
+	}
+}
+
+/// Convert a number to H160 address
+fn hash(a: u64) -> H160 {
+	H160::from_low_u64_be(a)
+}
+
+impl<R> PrecompileSet for SanctuaryPrecompiles<R>
+where
+	R: pallet_evm::Config,
+{
+	fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
+		match handle.code_address() {
+			// ECRecover
+			a if a == hash(1) => Some(pallet_evm_precompile_simple::ECRecover::execute(handle)),
+			// Sha256
+			a if a == hash(2) => Some(pallet_evm_precompile_simple::Sha256::execute(handle)),
+			// Ripemd160
+			a if a == hash(3) => Some(pallet_evm_precompile_simple::Ripemd160::execute(handle)),
+			// Identity
+			a if a == hash(4) => Some(pallet_evm_precompile_simple::Identity::execute(handle)),
+			// Modexp
+			a if a == hash(5) => Some(pallet_evm_precompile_modexp::Modexp::execute(handle)),
+			_ => None,
+		}
+	}
+
+	fn is_precompile(&self, address: H160, _gas: u64) -> IsPrecompileResult {
+		IsPrecompileResult::Answer {
+			is_precompile: Self::used_addresses().contains(&address),
+			extra_cost: 0,
+		}
+	}
+}
+
+parameter_types! {
+	pub PrecompilesValue: SanctuaryPrecompiles<Runtime> = SanctuaryPrecompiles::<Runtime>::new();
+}
+
+/// Configure EVM Chain ID
+impl pallet_evm_chain_id::Config for Runtime {}
+
+parameter_types! {
+	pub const ChainId: u64 = CHAIN_ID;
+}
+
+/// Configure EVM
+impl pallet_evm::Config for Runtime {
+	type AccountProvider = pallet_evm::FrameSystemAccountProvider<Self>;
+	type FeeCalculator = pallet_base_fee::Pallet<Self>;
+	type GasWeightMapping = pallet_evm::FixedGasWeightMapping<Self>;
+	type WeightPerGas = WeightPerGas;
+	type BlockHashMapping = pallet_ethereum::EthereumBlockHashMapping<Self>;
+	type CallOrigin = EnsureAddressTruncated;
+	type CreateOriginFilter = ();
+	type CreateInnerOriginFilter = ();
+	type WithdrawOrigin = EnsureAddressTruncated;
+	type AddressMapping = HashedAddressMapping;
+	type Currency = Balances;
+	type PrecompilesType = SanctuaryPrecompiles<Self>;
+	type PrecompilesValue = PrecompilesValue;
+	type ChainId = ChainId;
+	type BlockGasLimit = BlockGasLimit;
+	type Runner = pallet_evm::runner::stack::Runner<Self>;
+	type OnChargeTransaction = ();
+	type OnCreate = ();
+	type FindAuthor = FindAuthorTruncated<AuraAccountAdapter>;
+	type GasLimitPovSizeRatio = GasLimitPovSizeRatio;
+	type GasLimitStorageGrowthRatio = GasLimitStorageGrowthRatio;
+	type Timestamp = Timestamp;
+	type WeightInfo = pallet_evm::weights::SubstrateWeight<Self>;
+}
+
+/// Configure Ethereum compatibility layer
+impl pallet_ethereum::Config for Runtime {
+	type StateRoot = pallet_ethereum::IntermediateStateRoot<Self::Version>;
+	type PostLogContent = PostBlockAndTxnHashes;
+	type ExtraDataLength = ConstU32<30>;
+}
+
+/// Base fee threshold implementation
+pub struct BaseFeeThreshold;
+impl pallet_base_fee::BaseFeeThreshold for BaseFeeThreshold {
+	fn lower() -> Permill {
+		Permill::zero()
+	}
+	fn ideal() -> Permill {
+		Permill::from_parts(500_000)
+	}
+	fn upper() -> Permill {
+		Permill::from_parts(1_000_000)
+	}
+}
+
+/// Configure Base Fee (EIP-1559)
+impl pallet_base_fee::Config for Runtime {
+	type Threshold = BaseFeeThreshold;
+	type DefaultBaseFeePerGas = DefaultBaseFeePerGas;
+	type DefaultElasticity = DefaultElasticity;
+}
+
+/// Configure Dynamic Fee adjustment
+impl pallet_dynamic_fee::Config for Runtime {
+	type MinGasPriceBoundDivisor = BoundDivision;
 }

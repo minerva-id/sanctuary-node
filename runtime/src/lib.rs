@@ -345,4 +345,28 @@ mod runtime {
 	// Sanctuary Protocol Emission - Pre-computed Sigmoid Curve (v2.0)
 	#[runtime::pallet_index(9)]
 	pub type Emission = pallet_emission;
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// EVM PALLETS (Frontier Integration)
+	// ═══════════════════════════════════════════════════════════════════════
+
+	// EVM Chain ID
+	#[runtime::pallet_index(10)]
+	pub type EVMChainId = pallet_evm_chain_id;
+
+	// EVM - Ethereum Virtual Machine
+	#[runtime::pallet_index(11)]
+	pub type EVM = pallet_evm;
+
+	// Ethereum - Ethereum Block/Transaction compatibility
+	#[runtime::pallet_index(12)]
+	pub type Ethereum = pallet_ethereum;
+
+	// Base Fee - EIP-1559 implementation
+	#[runtime::pallet_index(13)]
+	pub type BaseFee = pallet_base_fee;
+
+	// Dynamic Fee adjustment
+	#[runtime::pallet_index(14)]
+	pub type DynamicFee = pallet_dynamic_fee;
 }
