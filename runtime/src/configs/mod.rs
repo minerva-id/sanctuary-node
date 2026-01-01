@@ -159,7 +159,6 @@ impl pallet_sudo::Config for Runtime {
 
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
 	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
 
@@ -203,7 +202,6 @@ impl pallet_authorship::Config for Runtime {
 // ═══════════════════════════════════════════════════════════════════════════
 
 impl pallet_emission::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type FindAuthor = AuraAccountAdapter;
 	type WeightInfo = ();
@@ -484,7 +482,6 @@ parameter_types! {
 }
 
 impl pallet_quantum_vault::Config for Runtime {
-	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type WeightInfo = pallet_quantum_vault::weights::SubstrateWeight<Self>;
 	type VaultCreationFee = VaultCreationFee;

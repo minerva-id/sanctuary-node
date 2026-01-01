@@ -2,11 +2,10 @@
 
 use frame_support::{
 	derive_impl, parameter_types,
-	traits::{ConstU32, ConstU64, ConstU128},
+	traits::{ConstU32, ConstU64},
 };
-use sp_core::H256;
 use sp_runtime::{
-	traits::{BlakeTwo256, IdentityLookup},
+	traits::IdentityLookup,
 	BuildStorage,
 };
 
@@ -60,7 +59,6 @@ parameter_types! {
 }
 
 impl pallet_quantum_vault::Config for Test {
-	type RuntimeEvent = RuntimeEvent;
 	type Currency = Balances;
 	type WeightInfo = ();
 	type VaultCreationFee = VaultCreationFee;

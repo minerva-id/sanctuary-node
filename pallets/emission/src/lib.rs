@@ -60,11 +60,11 @@ pub mod pallet {
     #[pallet::pallet]
     pub struct Pallet<T>(_);
 
-    /// Configuration trait for the emission pallet
+    /// Configuration trait for the emission pallet.
+    /// 
+    /// Note: `RuntimeEvent: From<Event<Self>>` is automatically appended by the pallet macro.
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        /// The overarching runtime event type
-        type RuntimeEvent: From<Event<Self>> + IsType<<Self as frame_system::Config>::RuntimeEvent>;
 
         /// Currency for reward distribution
         type Currency: Currency<Self::AccountId>;
