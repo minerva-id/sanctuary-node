@@ -69,6 +69,13 @@ cargo test -p pallet-quantum-vault
 
 ---
 
+## Documentation
+
+- **[Whitepaper v2.0](./whitepaper-v2.0.md)** - Complete technical specification, philosophy, and mathematical derivations.
+- [Blueprint](./blueprint.md) - Implementation plan and step-by-step progress.
+
+---
+
 ## Pallets
 
 ### ✅ Implemented
@@ -156,7 +163,8 @@ tesserax-node/
 │   ├── src/lib.rs           # construct_runtime!
 │   ├── src/configs/         # Pallet configurations
 │   └── src/apis.rs          # Runtime APIs (EthereumRuntimeRPCApi)
-└── blueprint.md             # Technical specification
+├── blueprint.md             # Implementation plan
+└── whitepaper-v2.0.md       # Technical specification
 ```
 
 ---
