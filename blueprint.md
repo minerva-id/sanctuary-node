@@ -165,28 +165,28 @@ print("];")
 
 ## **5. Roadmap Pengembangan (Implementation Plan)**
 
-### **Phase 1: Foundation (Minggu 1-2)**
+### **Phase 1: Foundation (Minggu 1-2) - ✅ DONE**
 
 * Inisialisasi repo Substrate Node Template.
 * Pembersihan pallet bawaan (Aura diganti BABE jika perlu, atau tetap Aura untuk MVP).
 * Integrasi `pallet-emission` dengan tabel hasil Python script.
 * **Goal:** Chain berjalan, blok diproduksi, reward TSRX tercetak sesuai kurva sigmoid.
 
-### **Phase 2: EVM Layer (Minggu 3-4)**
+### **Phase 2: EVM Layer (Minggu 3-4) - ✅ DONE**
 
 * Integrasi Frontier (`pallet-evm`, `pallet-ethereum`).
 * Konfigurasi Chain ID dan Genesis Account (untuk testing Metamask).
 * Setup EIP-1559 (Base fee burning).
 * **Goal:** Bisa connect Metamask, deploy Smart Contract via Remix.
 
-### **Phase 3: The Quantum Vault (Minggu 5-6)**
+### **Phase 3: The Quantum Vault (Minggu 5-6) - ✅ DONE**
 
 * Implementasi `pallet-quantum-vault`.
 * Integrasi library `pqcrypto` (Rust) atau implementasi *binding* C untuk verifikasi Dilithium/Falcon.
 * Testing unit untuk mekanisme penguncian (Locking mechanism).
 * **Goal:** Akun bisa di-lock, transaksi biasa gagal, transaksi vault berhasil.
 
-### **Phase 4: Testnet & Hardening (Minggu 7-8)**
+### **Phase 4: Testnet & Hardening (Minggu 7-8) - ✅ DONE**
 
 * Peluncuran Internal Testnet.
 * Stress test transaksi EVM.
