@@ -369,4 +369,11 @@ mod runtime {
 	// Dynamic Fee adjustment
 	#[runtime::pallet_index(14)]
 	pub type DynamicFee = pallet_dynamic_fee;
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// QUANTUM VAULT (Post-Quantum Cryptographic Cold Storage)
+	// ═══════════════════════════════════════════════════════════════════════
+
+	#[runtime::pallet_index(15)]
+	pub type QuantumVault = pallet_quantum_vault;
 }

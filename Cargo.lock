@@ -6812,6 +6812,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-quantum-vault"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex",
+ "log",
+ "pallet-balances",
+ "parity-scale-codec",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
 name = "pallet-session"
 version = "41.0.0"
 dependencies = [
@@ -11836,6 +11853,7 @@ dependencies = [
  "pallet-evm-precompile-sha3fips",
  "pallet-evm-precompile-simple",
  "pallet-grandpa",
+ "pallet-quantum-vault",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",

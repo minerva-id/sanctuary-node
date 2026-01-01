@@ -59,6 +59,7 @@ pallet-transaction-payment.workspace = true
 # Custom Pallets
 pallet-template.workspace = true
 pallet-emission.workspace = true
+pallet-quantum-vault.workspace = true
 
 # ═══════════════════════════════════════════════════════════════════════════
 # FRONTIER EVM
@@ -129,6 +130,7 @@ std = [
 	# Custom Pallets
 	"pallet-template/std",
 	"pallet-emission/std",
+	"pallet-quantum-vault/std",
 	# Frontier EVM
 	"pallet-evm/std",
 	"pallet-ethereum/std",

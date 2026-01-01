@@ -449,3 +449,39 @@ impl pallet_base_fee::Config for Runtime {
 impl pallet_dynamic_fee::Config for Runtime {
 	type MinGasPriceBoundDivisor = BoundDivision;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QUANTUM VAULT CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Post-Quantum Cryptographic Cold Storage
+// Uses CRYSTALS-Dilithium (NIST Level 3) for quantum-resistant protection
+//
+// Features:
+// - 10 TSRX fee to create vault (spam prevention)
+// - 100x fee multiplier for vault transfers (security premium)
+// - Standard transfers blocked for vault accounts
+// ═══════════════════════════════════════════════════════════════════════════
+
+use super::TSRX;
+
+parameter_types! {
+	/// Fee to create a quantum vault: 10 TSRX
+	pub const VaultCreationFee: Balance = 10 * TSRX;
+	/// Fee multiplier for vault transfers: 100x normal
+	pub const VaultTransferFeeMultiplier: u32 = 100;
+	/// Maximum public key size: Dilithium3 = 1952 bytes
+	pub const MaxPublicKeySize: u32 = 1952;
+	/// Maximum signature size: Dilithium3 = 3293 bytes
+	pub const MaxSignatureSize: u32 = 3293;
+}
+
+impl pallet_quantum_vault::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type Currency = Balances;
+	type WeightInfo = pallet_quantum_vault::weights::SubstrateWeight<Self>;
+	type VaultCreationFee = VaultCreationFee;
+	type VaultTransferFeeMultiplier = VaultTransferFeeMultiplier;
+	type MaxPublicKeySize = MaxPublicKeySize;
+	type MaxSignatureSize = MaxSignatureSize;
+}

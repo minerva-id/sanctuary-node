@@ -11,6 +11,7 @@ members = [
     "node",
     "pallets/template",
     "pallets/emission",
+    "pallets/quantum-vault",
     "runtime",
 ]
 resolver = "2"
@@ -22,6 +23,8 @@ resolver = "2"
 tesserax-runtime = { path = "./runtime", default-features = false }
 pallet-template = { path = "./pallets/template", default-features = false }
 pallet-emission = { path = "./pallets/emission", default-features = false }
+pallet-quantum-vault = { path = "./pallets/quantum-vault", default-features = false }
+hex = { version = "0.4", default-features = false, features = ["alloc"] }
 
 # ═══════════════════════════════════════════════════════════════════════════
 # POLKADOT SDK (stable2506 - Local Path)
