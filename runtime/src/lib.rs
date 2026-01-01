@@ -7,6 +7,7 @@ pub mod apis;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarks;
 pub mod configs;
+pub mod vault_blocker;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // THE TESSERAX CONSTANT - Economic DNA of the Protocol
@@ -107,6 +108,7 @@ pub mod tesserax_constants {
 
 extern crate alloc;
 use alloc::vec::Vec;
+use codec::{Decode, Encode};
 use sp_runtime::{
 	generic, impl_opaque_keys,
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
@@ -270,11 +272,40 @@ pub type TxExtension = (
 	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 	frame_metadata_hash_extension::CheckMetadataHash<Runtime>,
 	frame_system::WeightReclaim<Runtime>,
+	vault_blocker::CheckVaultTransfer,
 );
 
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic =
 	generic::UncheckedExtrinsic<Address, RuntimeCall, Signature, TxExtension>;
+
+/// Ethereum transaction converter for Frontier RPC
+#[derive(Clone)]
+pub struct TransactionConverter;
+
+impl Default for TransactionConverter {
+	fn default() -> Self {
+		Self
+	}
+}
+
+impl fp_rpc::ConvertTransaction<UncheckedExtrinsic> for TransactionConverter {
+	fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> UncheckedExtrinsic {
+		let call = pallet_ethereum::Call::<Runtime>::transact { transaction }.into();
+		generic::UncheckedExtrinsic::new_bare(call)
+	}
+}
+
+impl fp_rpc::ConvertTransaction<opaque::UncheckedExtrinsic> for TransactionConverter {
+	fn convert_transaction(&self, transaction: pallet_ethereum::Transaction) -> opaque::UncheckedExtrinsic {
+		let extrinsic = UncheckedExtrinsic::new_bare(
+			pallet_ethereum::Call::<Runtime>::transact { transaction }.into(),
+		);
+		let encoded = extrinsic.encode();
+		opaque::UncheckedExtrinsic::decode(&mut &encoded[..])
+			.expect("Encoded extrinsic is always valid")
+	}
+}
 
 /// The payload being signed in transactions.
 pub type SignedPayload = generic::SignedPayload<RuntimeCall, TxExtension>;

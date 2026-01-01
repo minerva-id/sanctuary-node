@@ -224,17 +224,13 @@ pub fn new_frontier_backend<C>(
 where
 	C: HeaderBackend<Block> + Send + Sync + 'static,
 {
-	let db_path = config.database.path().map(|p| p.join("frontier/db"));
-	let db_path = db_path.as_ref().map(|p| p.as_path());
+	let db_config_dir = config.database.path()
+		.ok_or("Database path must exist for Frontier backend")?;
 	
 	Ok(Arc::new(fc_db::kv::Backend::open(
 		client,
-		db_path,
-		&fc_db::kv::DatabaseSettings {
-			source: fc_db::kv::DatabaseSource::Auto {
-				path: db_path.expect("Database path must exist").to_path_buf(),
-			},
-		},
+		&config.database,
+		db_config_dir,
 	)?))
 }
 
@@ -243,7 +239,7 @@ pub fn spawn_frontier_tasks<B, BE, C>(
 	task_manager: &TaskManager,
 	client: Arc<C>,
 	backend: Arc<BE>,
-	frontier_backend: Arc<dyn fc_api::Backend<B>>,
+	frontier_backend: Arc<fc_db::kv::Backend<B, C>>,
 	filter_pool: Option<FilterPool>,
 	storage_override: Arc<dyn StorageOverride<B>>,
 	fee_history_cache: FeeHistoryCache,

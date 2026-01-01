@@ -83,21 +83,21 @@ substrate-frame-rpc-system.default-features = true
 substrate-frame-rpc-system.workspace = true
 
 # Cumulus (for EVM proof size host function)
-cumulus-primitives-proof-size-hostfunction = { path = "/home/minerva/polkadot-sdk/cumulus/primitives/proof-size-hostfunction" }
+cumulus-primitives-proof-size-hostfunction.workspace = true
 
 # Frontier RPC (for full Ethereum JSON-RPC / Metamask compatibility)
-fc-api = { path = "/home/minerva/frontier/client/api" }
-fc-rpc = { path = "/home/minerva/frontier/client/rpc", features = ["rpc-binary-search-estimate", "txpool"] }
-fc-rpc-core = { path = "/home/minerva/frontier/client/rpc-core" }
-fc-mapping-sync = { path = "/home/minerva/frontier/client/mapping-sync" }
-fc-db = { path = "/home/minerva/frontier/client/db" }
-fc-storage = { path = "/home/minerva/frontier/client/storage" }
+fc-api.workspace = true
+fc-rpc = { workspace = true, features = ["rpc-binary-search-estimate", "txpool"] }
+fc-rpc-core.workspace = true
+fc-mapping-sync.workspace = true
+fc-db.workspace = true
+fc-storage.workspace = true
 fp-rpc.workspace = true
 fp-evm.workspace = true
-pallet-ethereum = { path = "/home/minerva/frontier/frame/ethereum" }
+pallet-ethereum.workspace = true
 
 # Network sync 
-sc-network-sync = { path = "/home/minerva/polkadot-sdk/substrate/client/network/sync" }
+sc-network-sync.workspace = true
 
 [build-dependencies]
 substrate-build-script-utils.default-features = true

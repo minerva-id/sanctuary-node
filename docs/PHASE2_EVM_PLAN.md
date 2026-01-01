@@ -45,7 +45,7 @@ Required crates:
 ### Step 4: Configure Runtime
 1. Add EVM config to runtime/src/configs/mod.rs
 2. Configure precompiles
-3. Set Chain ID (suggested: 7777 for Sanctuary)
+3. Set Chain ID (13817 - derived from Tesserax Constant)
 4. Configure EIP-1559 base fee
 
 ### Step 5: Update Node for EVM RPC

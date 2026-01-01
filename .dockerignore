@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# TESSERAX PROTOCOL - DOCKER IGNORE
+# ═══════════════════════════════════════════════════════════════════════════
+# Exclude files that don't need to be in the Docker build context
+
+# Build artifacts
+target/
+*.pdb
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation (not needed for build)
+docs/
+*.md
+!README.md
+
+# Local configuration
+.env
+.env.local
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+*.log
+*.tmp
+
+# Rust
+Cargo.lock.bak

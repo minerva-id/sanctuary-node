@@ -211,7 +211,7 @@ impl pallet_emission::Config for Runtime {
 // EVM CONFIGURATION (Frontier Integration)
 // ═══════════════════════════════════════════════════════════════════════════
 //
-// Chain ID: 7777 (Tesserax Network)
+// Chain ID: 13817 (Tesserax Network - derived from Tesserax Constant)
 // Features: Full EVM compatibility, EIP-1559 base fee
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -223,8 +223,8 @@ use sp_core::{H160, U256};
 use core::marker::PhantomData;
 use sp_runtime::Permill;
 
-/// Tesserax Chain ID: 7777
-pub const CHAIN_ID: u64 = 7777;
+/// Tesserax Chain ID: 13817 (derived from floor(π × e × φ × 10^6) = 13,817,422)
+pub const CHAIN_ID: u64 = 13817;
 
 /// Block gas limit
 pub const BLOCK_GAS_LIMIT: u64 = 75_000_000;

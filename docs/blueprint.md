@@ -188,9 +188,17 @@ print("];")
 
 ### **Phase 4: Testnet & Hardening (Minggu 7-8) - ✅ DONE**
 
-* Peluncuran Internal Testnet.
-* Stress test transaksi EVM.
-* Simulasi serangan spam pada Quantum Vault.
+* Unit testing lengkap (19 tests passing).
+* Benchmarking module setup untuk `pallet-quantum-vault`.
+* Frontier RPC module integration (`eth.rs`).
+* Transfer blocking hooks (`CheckVaultTransfer` TransactionExtension).
 * Pembuatan dokumentasi teknis (Whitepaper v2.0).
+* **Pending:** Peluncuran Public Testnet.
+
+### **Phase 5: Mainnet (TBD)**
+
+* Security Audit.
+* Genesis Block Ceremony.
+* Mainnet Launch.
 
 ---

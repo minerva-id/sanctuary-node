@@ -27,97 +27,105 @@ pallet-quantum-vault = { path = "./pallets/quantum-vault", default-features = fa
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# POLKADOT SDK (stable2506 - Local Path)
+# POLKADOT SDK (stable2506)
+# https://github.com/paritytech/polkadot-sdk
+# Commit: dc937dd74221e38ce4c184be27b6cdcf36de0452
 # ═══════════════════════════════════════════════════════════════════════════
 # Substrate Client
-sc-basic-authorship = { path = "/home/minerva/polkadot-sdk/substrate/client/basic-authorship" }
-sc-cli = { path = "/home/minerva/polkadot-sdk/substrate/client/cli" }
-sc-client-api = { path = "/home/minerva/polkadot-sdk/substrate/client/api" }
-sc-consensus = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/common" }
-sc-consensus-aura = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/aura" }
-sc-consensus-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/grandpa" }
-sc-executor = { path = "/home/minerva/polkadot-sdk/substrate/client/executor" }
-sc-network = { path = "/home/minerva/polkadot-sdk/substrate/client/network" }
-sc-offchain = { path = "/home/minerva/polkadot-sdk/substrate/client/offchain" }
-sc-service = { path = "/home/minerva/polkadot-sdk/substrate/client/service" }
-sc-telemetry = { path = "/home/minerva/polkadot-sdk/substrate/client/telemetry" }
-sc-rpc = { path = "/home/minerva/polkadot-sdk/substrate/client/rpc" }
-sc-transaction-pool = { path = "/home/minerva/polkadot-sdk/substrate/client/transaction-pool" }
-sc-transaction-pool-api = { path = "/home/minerva/polkadot-sdk/substrate/client/transaction-pool/api" }
+sc-basic-authorship = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-cli = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-client-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-consensus = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-consensus-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-executor = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-network = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-network-sync = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-offchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-service = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-telemetry = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sc-transaction-pool-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
 
 # Substrate Primitives
-sp-api = { path = "/home/minerva/polkadot-sdk/substrate/primitives/api", default-features = false }
-sp-block-builder = { path = "/home/minerva/polkadot-sdk/substrate/primitives/block-builder", default-features = false }
-sp-blockchain = { path = "/home/minerva/polkadot-sdk/substrate/primitives/blockchain" }
-sp-consensus-aura = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/aura", default-features = false }
-sp-consensus-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/grandpa", default-features = false }
-sp-core = { path = "/home/minerva/polkadot-sdk/substrate/primitives/core", default-features = false }
-sp-genesis-builder = { path = "/home/minerva/polkadot-sdk/substrate/primitives/genesis-builder", default-features = false }
-sp-inherents = { path = "/home/minerva/polkadot-sdk/substrate/primitives/inherents", default-features = false }
-sp-io = { path = "/home/minerva/polkadot-sdk/substrate/primitives/io", default-features = false }
-sp-keyring = { path = "/home/minerva/polkadot-sdk/substrate/primitives/keyring", default-features = false }
-sp-offchain = { path = "/home/minerva/polkadot-sdk/substrate/primitives/offchain", default-features = false }
-sp-runtime = { path = "/home/minerva/polkadot-sdk/substrate/primitives/runtime", default-features = false }
-sp-session = { path = "/home/minerva/polkadot-sdk/substrate/primitives/session", default-features = false }
-sp-storage = { path = "/home/minerva/polkadot-sdk/substrate/primitives/storage", default-features = false }
-sp-timestamp = { path = "/home/minerva/polkadot-sdk/substrate/primitives/timestamp" }
-sp-transaction-pool = { path = "/home/minerva/polkadot-sdk/substrate/primitives/transaction-pool", default-features = false }
-sp-version = { path = "/home/minerva/polkadot-sdk/substrate/primitives/version", default-features = false }
+sp-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-block-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-blockchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sp-consensus-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-consensus-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-core = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-genesis-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-inherents = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-io = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-keyring = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-offchain = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-session = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-storage = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+sp-transaction-pool = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+sp-version = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
 
 # Substrate FRAME
-frame-benchmarking = { path = "/home/minerva/polkadot-sdk/substrate/frame/benchmarking", default-features = false }
-frame-benchmarking-cli = { path = "/home/minerva/polkadot-sdk/substrate/utils/frame/benchmarking-cli" }
-frame-executive = { path = "/home/minerva/polkadot-sdk/substrate/frame/executive", default-features = false }
-frame-metadata-hash-extension = { path = "/home/minerva/polkadot-sdk/substrate/frame/metadata-hash-extension", default-features = false }
-frame-support = { path = "/home/minerva/polkadot-sdk/substrate/frame/support", default-features = false }
-frame-system = { path = "/home/minerva/polkadot-sdk/substrate/frame/system", default-features = false }
-frame-system-benchmarking = { path = "/home/minerva/polkadot-sdk/substrate/frame/system/benchmarking", default-features = false }
-frame-system-rpc-runtime-api = { path = "/home/minerva/polkadot-sdk/substrate/frame/system/rpc/runtime-api", default-features = false }
-frame-try-runtime = { path = "/home/minerva/polkadot-sdk/substrate/frame/try-runtime", default-features = false }
+frame-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-benchmarking-cli = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+frame-executive = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-metadata-hash-extension = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-support = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-system = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-system-benchmarking = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-system-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+frame-try-runtime = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
 
 # Substrate Pallets
-pallet-aura = { path = "/home/minerva/polkadot-sdk/substrate/frame/aura", default-features = false }
-pallet-authorship = { path = "/home/minerva/polkadot-sdk/substrate/frame/authorship", default-features = false }
-pallet-balances = { path = "/home/minerva/polkadot-sdk/substrate/frame/balances", default-features = false }
-pallet-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/frame/grandpa", default-features = false }
-pallet-sudo = { path = "/home/minerva/polkadot-sdk/substrate/frame/sudo", default-features = false }
-pallet-timestamp = { path = "/home/minerva/polkadot-sdk/substrate/frame/timestamp", default-features = false }
-pallet-transaction-payment = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment", default-features = false }
-pallet-transaction-payment-rpc = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment/rpc" }
-pallet-transaction-payment-rpc-runtime-api = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment/rpc/runtime-api", default-features = false }
+pallet-aura = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-authorship = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-balances = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-grandpa = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
+pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506", default-features = false }
 
 # Substrate Utilities
-substrate-build-script-utils = { path = "/home/minerva/polkadot-sdk/substrate/utils/build-script-utils" }
-substrate-frame-rpc-system = { path = "/home/minerva/polkadot-sdk/substrate/utils/frame/rpc/system" }
-substrate-wasm-builder = { path = "/home/minerva/polkadot-sdk/substrate/utils/wasm-builder" }
+substrate-build-script-utils = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+substrate-frame-rpc-system = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+substrate-wasm-builder = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
+
+# Cumulus (for host functions)
+cumulus-primitives-proof-size-hostfunction = { git = "https://github.com/paritytech/polkadot-sdk", branch = "stable2506" }
 
 # ═══════════════════════════════════════════════════════════════════════════
-# FRONTIER (EVM Compatibility Layer - Local Path)
+# FRONTIER (EVM Compatibility Layer)
+# https://github.com/polkadot-evm/frontier
+# Commit: 7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3
 # ═══════════════════════════════════════════════════════════════════════════
 # Frontier Pallets
-pallet-evm = { path = "/home/minerva/frontier/frame/evm", default-features = false }
-pallet-ethereum = { path = "/home/minerva/frontier/frame/ethereum", default-features = false }
-pallet-base-fee = { path = "/home/minerva/frontier/frame/base-fee", default-features = false }
-pallet-dynamic-fee = { path = "/home/minerva/frontier/frame/dynamic-fee", default-features = false }
-pallet-evm-chain-id = { path = "/home/minerva/frontier/frame/evm-chain-id", default-features = false }
-pallet-evm-precompile-simple = { path = "/home/minerva/frontier/frame/evm/precompile/simple", default-features = false }
-pallet-evm-precompile-modexp = { path = "/home/minerva/frontier/frame/evm/precompile/modexp", default-features = false }
-pallet-evm-precompile-sha3fips = { path = "/home/minerva/frontier/frame/evm/precompile/sha3fips", default-features = false }
+pallet-evm = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-ethereum = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-base-fee = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-dynamic-fee = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-evm-chain-id = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-evm-precompile-simple = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-evm-precompile-modexp = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+pallet-evm-precompile-sha3fips = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
 
 # Frontier Primitives
-fp-account = { path = "/home/minerva/frontier/primitives/account", default-features = false }
-fp-evm = { path = "/home/minerva/frontier/primitives/evm", default-features = false }
-fp-rpc = { path = "/home/minerva/frontier/primitives/rpc", default-features = false }
-fp-self-contained = { path = "/home/minerva/frontier/primitives/self-contained", default-features = false }
+fp-account = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+fp-evm = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+fp-rpc = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
+fp-self-contained = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3", default-features = false }
 
 # Frontier Client (for node RPC)
-fc-api = { path = "/home/minerva/frontier/client/api" }
-fc-consensus = { path = "/home/minerva/frontier/client/consensus" }
-fc-db = { path = "/home/minerva/frontier/client/db" }
-fc-mapping-sync = { path = "/home/minerva/frontier/client/mapping-sync" }
-fc-rpc = { path = "/home/minerva/frontier/client/rpc" }
-fc-rpc-core = { path = "/home/minerva/frontier/client/rpc-core" }
-fc-storage = { path = "/home/minerva/frontier/client/storage" }
+fc-api = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-consensus = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-db = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-mapping-sync = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-rpc = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-rpc-core = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
+fc-storage = { git = "https://github.com/polkadot-evm/frontier", rev = "7cdf7fd1f7ad5f866014ea7dfe2b063be4d08bd3" }
 
 # ═══════════════════════════════════════════════════════════════════════════
 # COMMON DEPENDENCIES
@@ -140,105 +148,3 @@ panic = "unwind"
 codegen-units = 1
 inherits = "release"
 lto = true
-
-# ═══════════════════════════════════════════════════════════════════════════
-# PATCH - Override git dependencies with local paths
-# ═══════════════════════════════════════════════════════════════════════════
-[patch."https://github.com/paritytech/polkadot-sdk"]
-# Substrate Client
-sc-basic-authorship = { path = "/home/minerva/polkadot-sdk/substrate/client/basic-authorship" }
-sc-block-builder = { path = "/home/minerva/polkadot-sdk/substrate/client/block-builder" }
-sc-chain-spec = { path = "/home/minerva/polkadot-sdk/substrate/client/chain-spec" }
-sc-cli = { path = "/home/minerva/polkadot-sdk/substrate/client/cli" }
-sc-client-api = { path = "/home/minerva/polkadot-sdk/substrate/client/api" }
-sc-client-db = { path = "/home/minerva/polkadot-sdk/substrate/client/db" }
-sc-consensus = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/common" }
-sc-consensus-aura = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/aura" }
-sc-consensus-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/grandpa" }
-sc-consensus-manual-seal = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/manual-seal" }
-sc-consensus-slots = { path = "/home/minerva/polkadot-sdk/substrate/client/consensus/slots" }
-sc-executor = { path = "/home/minerva/polkadot-sdk/substrate/client/executor" }
-sc-keystore = { path = "/home/minerva/polkadot-sdk/substrate/client/keystore" }
-sc-network = { path = "/home/minerva/polkadot-sdk/substrate/client/network" }
-sc-network-common = { path = "/home/minerva/polkadot-sdk/substrate/client/network/common" }
-sc-network-sync = { path = "/home/minerva/polkadot-sdk/substrate/client/network/sync" }
-sc-offchain = { path = "/home/minerva/polkadot-sdk/substrate/client/offchain" }
-sc-rpc = { path = "/home/minerva/polkadot-sdk/substrate/client/rpc" }
-sc-rpc-api = { path = "/home/minerva/polkadot-sdk/substrate/client/rpc-api" }
-sc-service = { path = "/home/minerva/polkadot-sdk/substrate/client/service" }
-sc-telemetry = { path = "/home/minerva/polkadot-sdk/substrate/client/telemetry" }
-sc-transaction-pool = { path = "/home/minerva/polkadot-sdk/substrate/client/transaction-pool" }
-sc-transaction-pool-api = { path = "/home/minerva/polkadot-sdk/substrate/client/transaction-pool/api" }
-
-# Substrate Primitives  
-sp-api = { path = "/home/minerva/polkadot-sdk/substrate/primitives/api" }
-sp-application-crypto = { path = "/home/minerva/polkadot-sdk/substrate/primitives/application-crypto" }
-sp-arithmetic = { path = "/home/minerva/polkadot-sdk/substrate/primitives/arithmetic" }
-sp-block-builder = { path = "/home/minerva/polkadot-sdk/substrate/primitives/block-builder" }
-sp-blockchain = { path = "/home/minerva/polkadot-sdk/substrate/primitives/blockchain" }
-sp-consensus = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/common" }
-sp-consensus-aura = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/aura" }
-sp-consensus-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/grandpa" }
-sp-consensus-slots = { path = "/home/minerva/polkadot-sdk/substrate/primitives/consensus/slots" }
-sp-core = { path = "/home/minerva/polkadot-sdk/substrate/primitives/core" }
-sp-crypto-hashing = { path = "/home/minerva/polkadot-sdk/substrate/primitives/crypto/hashing" }
-sp-database = { path = "/home/minerva/polkadot-sdk/substrate/primitives/database" }
-sp-externalities = { path = "/home/minerva/polkadot-sdk/substrate/primitives/externalities" }
-sp-genesis-builder = { path = "/home/minerva/polkadot-sdk/substrate/primitives/genesis-builder" }
-sp-inherents = { path = "/home/minerva/polkadot-sdk/substrate/primitives/inherents" }
-sp-io = { path = "/home/minerva/polkadot-sdk/substrate/primitives/io" }
-sp-keyring = { path = "/home/minerva/polkadot-sdk/substrate/primitives/keyring" }
-sp-keystore = { path = "/home/minerva/polkadot-sdk/substrate/primitives/keystore" }
-sp-offchain = { path = "/home/minerva/polkadot-sdk/substrate/primitives/offchain" }
-sp-runtime = { path = "/home/minerva/polkadot-sdk/substrate/primitives/runtime" }
-sp-runtime-interface = { path = "/home/minerva/polkadot-sdk/substrate/primitives/runtime-interface" }
-sp-session = { path = "/home/minerva/polkadot-sdk/substrate/primitives/session" }
-sp-staking = { path = "/home/minerva/polkadot-sdk/substrate/primitives/staking" }
-sp-state-machine = { path = "/home/minerva/polkadot-sdk/substrate/primitives/state-machine" }
-sp-std = { path = "/home/minerva/polkadot-sdk/substrate/primitives/std" }
-sp-storage = { path = "/home/minerva/polkadot-sdk/substrate/primitives/storage" }
-sp-timestamp = { path = "/home/minerva/polkadot-sdk/substrate/primitives/timestamp" }
-sp-tracing = { path = "/home/minerva/polkadot-sdk/substrate/primitives/tracing" }
-sp-transaction-pool = { path = "/home/minerva/polkadot-sdk/substrate/primitives/transaction-pool" }
-sp-trie = { path = "/home/minerva/polkadot-sdk/substrate/primitives/trie" }
-sp-version = { path = "/home/minerva/polkadot-sdk/substrate/primitives/version" }
-sp-weights = { path = "/home/minerva/polkadot-sdk/substrate/primitives/weights" }
-sp-wasm-interface = { path = "/home/minerva/polkadot-sdk/substrate/primitives/wasm-interface" }
-
-# Substrate FRAME
-frame-benchmarking = { path = "/home/minerva/polkadot-sdk/substrate/frame/benchmarking" }
-frame-benchmarking-cli = { path = "/home/minerva/polkadot-sdk/substrate/utils/frame/benchmarking-cli" }
-frame-executive = { path = "/home/minerva/polkadot-sdk/substrate/frame/executive" }
-frame-metadata-hash-extension = { path = "/home/minerva/polkadot-sdk/substrate/frame/metadata-hash-extension" }
-frame-support = { path = "/home/minerva/polkadot-sdk/substrate/frame/support" }
-frame-system = { path = "/home/minerva/polkadot-sdk/substrate/frame/system" }
-frame-system-benchmarking = { path = "/home/minerva/polkadot-sdk/substrate/frame/system/benchmarking" }
-frame-system-rpc-runtime-api = { path = "/home/minerva/polkadot-sdk/substrate/frame/system/rpc/runtime-api" }
-frame-try-runtime = { path = "/home/minerva/polkadot-sdk/substrate/frame/try-runtime" }
-
-# Substrate Pallets
-pallet-aura = { path = "/home/minerva/polkadot-sdk/substrate/frame/aura" }
-pallet-authorship = { path = "/home/minerva/polkadot-sdk/substrate/frame/authorship" }
-pallet-balances = { path = "/home/minerva/polkadot-sdk/substrate/frame/balances" }
-pallet-grandpa = { path = "/home/minerva/polkadot-sdk/substrate/frame/grandpa" }
-pallet-sudo = { path = "/home/minerva/polkadot-sdk/substrate/frame/sudo" }
-pallet-timestamp = { path = "/home/minerva/polkadot-sdk/substrate/frame/timestamp" }
-pallet-transaction-payment = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment" }
-pallet-transaction-payment-rpc = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment/rpc" }
-pallet-transaction-payment-rpc-runtime-api = { path = "/home/minerva/polkadot-sdk/substrate/frame/transaction-payment/rpc/runtime-api" }
-pallet-utility = { path = "/home/minerva/polkadot-sdk/substrate/frame/utility" }
-
-# Substrate Utilities
-substrate-prometheus-endpoint = { path = "/home/minerva/polkadot-sdk/substrate/utils/prometheus" }
-substrate-build-script-utils = { path = "/home/minerva/polkadot-sdk/substrate/utils/build-script-utils" }
-substrate-frame-rpc-system = { path = "/home/minerva/polkadot-sdk/substrate/utils/frame/rpc/system" }
-substrate-wasm-builder = { path = "/home/minerva/polkadot-sdk/substrate/utils/wasm-builder" }
-substrate-test-runtime-client = { path = "/home/minerva/polkadot-sdk/substrate/test-utils/runtime/client" }
-
-# Polkadot
-polkadot-runtime-common = { path = "/home/minerva/polkadot-sdk/polkadot/runtime/common" }
-
-# Cumulus
-cumulus-pallet-weight-reclaim = { path = "/home/minerva/polkadot-sdk/cumulus/pallets/weight-reclaim" }
-cumulus-primitives-storage-weight-reclaim = { path = "/home/minerva/polkadot-sdk/cumulus/primitives/storage-weight-reclaim" }
-cumulus-primitives-proof-size-hostfunction = { path = "/home/minerva/polkadot-sdk/cumulus/primitives/proof-size-hostfunction" }

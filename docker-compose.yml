@@ -1,0 +1,68 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# TESSERAX PROTOCOL - DOCKER COMPOSE
+# ═══════════════════════════════════════════════════════════════════════════
+# Quick start: docker compose up -d
+# ═══════════════════════════════════════════════════════════════════════════
+
+version: "3.9"
+
+services:
+  tesserax-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tesserax/node:latest
+    container_name: tesserax-node
+    restart: unless-stopped
+    ports:
+      # P2P Networking
+      - "30333:30333"
+      # WebSocket RPC (Substrate + Ethereum JSON-RPC)
+      - "9944:9944"
+      # Prometheus Metrics
+      - "9615:9615"
+    volumes:
+      - tesserax-data:/data
+    command:
+      - "--dev"
+      - "--ws-external"
+      - "--rpc-external"
+      - "--rpc-cors=all"
+      - "--name=TesseraxNode"
+    environment:
+      - RUST_LOG=info
+
+  # Development mode with Alice validator
+  tesserax-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tesserax/node:latest
+    container_name: tesserax-dev
+    restart: unless-stopped
+    ports:
+      - "30333:30333"
+      - "9944:9944"
+      - "9615:9615"
+    volumes:
+      - tesserax-dev-data:/data
+    command:
+      - "--dev"
+      - "--alice"
+      - "--ws-external"
+      - "--rpc-external"
+      - "--rpc-cors=all"
+      - "--rpc-methods=Unsafe"
+      - "--name=TesseraxDev"
+    profiles:
+      - dev
+
+volumes:
+  tesserax-data:
+    driver: local
+  tesserax-dev-data:
+    driver: local
+
+networks:
+  default:
+    name: tesserax-network

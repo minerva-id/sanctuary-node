@@ -128,7 +128,7 @@ Connect **Metamask** to Tesserax:
 |---------|-------|
 | **Network Name** | Tesserax Protocol |
 | **RPC URL** | `http://127.0.0.1:9944` |
-| **Chain ID** | `7777` |
+| **Chain ID** | `13817` |
 | **Symbol** | `TSRX` |
 
 ### Supported RPC Methods:
@@ -224,7 +224,12 @@ Connect to [Polkadot.js Apps](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0
 - [x] **Phase 1**: Foundation + Sigmoid Emission
 - [x] **Phase 2**: EVM Integration (Frontier)
 - [x] **Phase 3**: Quantum Vault (CRYSTALS-Dilithium)
-- [ ] **Phase 4**: Testnet Launch & Hardening
+- [x] **Phase 4**: Testnet Hardening
+  - [x] Unit testing (19 tests passing)
+  - [x] Benchmarking module setup
+  - [x] Full Frontier RPC (eth_*, net_*, web3_*)
+  - [x] Transfer blocking for vault accounts
+  - [ ] Public testnet launch
 - [ ] **Phase 5**: Mainnet Preparation
 
 ---
