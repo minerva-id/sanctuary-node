@@ -463,22 +463,37 @@ impl pallet_dynamic_fee::Config for Runtime {
 // - Faster verification = better throughput
 //
 // Features:
-// - 10 TSRX fee to create vault (spam prevention)
-// - 100x fee multiplier for vault transfers (security premium)
+// - 10 TSRX fee to create vault (sent to treasury)
+// - 1 TSRX premium fee for vault transfers (0.01 * 100x)
 // - Standard transfers blocked for vault accounts
+// - All fees preserved in treasury (not burned)
 // ═══════════════════════════════════════════════════════════════════════════
 
 use super::TSRX;
 
 parameter_types! {
-	/// Fee to create a quantum vault: 10 TSRX
+	/// Fee to create a quantum vault: 10 TSRX (sent to treasury)
 	pub const VaultCreationFee: Balance = 10 * TSRX;
-	/// Fee multiplier for vault transfers: 100x normal
+	/// Fee multiplier for vault transfers: 100x
 	pub const VaultTransferFeeMultiplier: u32 = 100;
+	/// Base fee for vault transfer premium: 0.01 TSRX
+	/// Premium = 0.01 TSRX * 100 = 1 TSRX per vault transfer
+	pub const VaultTransferBaseFee: Balance = TSRX / 100;
 	/// Maximum public key size: Dilithium2 = 1312 bytes
 	pub const MaxPublicKeySize: u32 = 1312;
 	/// Maximum signature size: Dilithium2 = 2420 bytes
 	pub const MaxSignatureSize: u32 = 2420;
+	/// Protocol treasury account for vault fees
+	/// Uses a deterministic address: "modl" + "tesserax" + zeros
+	/// This can be changed to a governance-controlled multisig later
+	pub TreasuryAccountId: AccountId = {
+		// Create a deterministic treasury address
+		// Format: "tesserax/vault_treasury" padded to 32 bytes
+		let mut bytes = [0u8; 32];
+		let prefix = b"tesserax/vault_treasury";
+		bytes[..prefix.len().min(32)].copy_from_slice(&prefix[..prefix.len().min(32)]);
+		AccountId::from(bytes)
+	};
 }
 
 impl pallet_quantum_vault::Config for Runtime {
@@ -486,6 +501,9 @@ impl pallet_quantum_vault::Config for Runtime {
 	type WeightInfo = pallet_quantum_vault::weights::SubstrateWeight<Self>;
 	type VaultCreationFee = VaultCreationFee;
 	type VaultTransferFeeMultiplier = VaultTransferFeeMultiplier;
+	type VaultTransferBaseFee = VaultTransferBaseFee;
 	type MaxPublicKeySize = MaxPublicKeySize;
 	type MaxSignatureSize = MaxSignatureSize;
+	type TreasuryAccount = TreasuryAccountId;
 }
+

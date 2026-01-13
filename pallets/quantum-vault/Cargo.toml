@@ -20,8 +20,13 @@ frame-support = { workspace = true }
 frame-system = { workspace = true }
 sp-runtime = { workspace = true }
 sp-core = { workspace = true }
+sp-io = { workspace = true }
 log = { workspace = true }
 hex = { workspace = true }
+
+# Post-Quantum Cryptography (CRYSTALS-Dilithium Level 2)
+# Only included in std builds due to getrandom dependency issues in WASM
+pqc_dilithium = { workspace = true, optional = true }
 
 # Token operations
 pallet-balances = { workspace = true }
@@ -43,6 +48,8 @@ std = [
     "pallet-balances/std",
     "log/std",
     "hex/std",
+    # Enable pqc_dilithium only in std mode
+    "pqc_dilithium",
 ]
 runtime-benchmarks = [
     "frame-benchmarking/runtime-benchmarks",

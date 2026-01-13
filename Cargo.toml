@@ -140,6 +140,9 @@ serde_json = { version = "1.0", default-features = false }
 hex-literal = { version = "0.4" }
 ethereum = { version = "0.18", default-features = false }
 
+# Post-Quantum Cryptography
+pqc_dilithium = { version = "0.2", default-features = false, features = ["mode2"] }
+
 [profile.release]
 opt-level = 3
 panic = "unwind"
