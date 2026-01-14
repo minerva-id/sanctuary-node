@@ -52,12 +52,12 @@ impl pallet_balances::Config for Test {
 }
 
 parameter_types! {
-	/// 10 units for vault creation
-	pub const VaultCreationFee: u64 = 10;
-	/// 100x fee multiplier
-	pub const VaultTransferFeeMultiplier: u32 = 100;
+	/// 2 units for vault creation (reduced from 10 per whitepaper v3.0)
+	pub const VaultCreationFee: u64 = 2;
+	/// 10x fee multiplier (reduced from 100x per whitepaper v3.0)
+	pub const VaultTransferFeeMultiplier: u32 = 10;
 	/// Base fee for vault transfers (1 unit)
-	/// Premium = 1 * 100 = 100 units per vault transfer
+	/// Premium = 1 * 10 = 10 units per vault transfer
 	pub const VaultTransferBaseFee: u64 = 1;
 	/// Dilithium2 public key size
 	pub const MaxPublicKeySize: u32 = 1312;
@@ -89,7 +89,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			(1, 1000),  // Alice with 1000 units
 			(2, 500),   // Bob with 500 units
 			(3, 100),   // Charlie with 100 units
-			(4, 5),     // Dave with only 5 units (not enough for vault)
+			(4, 1),     // Dave with only 1 unit (existential, not enough for vault fee)
 			(99, 1),    // Treasury starts with 1 unit (existential deposit)
 		],
 		dev_accounts: None,

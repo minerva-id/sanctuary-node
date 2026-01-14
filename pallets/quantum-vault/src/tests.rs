@@ -6,8 +6,10 @@
 use crate::{mock::*, Error, Event, Vaults, VaultNonces, TotalVaults, TotalFeesCollected};
 use frame_support::{assert_noop, assert_ok};
 
-/// Premium fee for vault transfers: BaseFee(1) * Multiplier(100) = 100 units
-const PREMIUM_FEE: u64 = 100;
+/// Creation fee per whitepaper v3.0: 2 units (reduced from 10)
+const CREATION_FEE: u64 = 2;
+/// Premium fee for vault transfers: BaseFee(1) * Multiplier(10) = 10 units
+const PREMIUM_FEE: u64 = 10;
 /// Treasury account ID in tests
 const TREASURY: u64 = 99;
 
@@ -36,8 +38,8 @@ fn create_vault_works() {
 		// Total vaults should be 1
 		assert_eq!(TotalVaults::<Test>::get(), 1);
 
-		// Alice should have paid the fee (1000 - 10 = 990)
-		assert_eq!(Balances::free_balance(alice), 990);
+		// Alice should have paid the fee (1000 - 2 = 998)
+		assert_eq!(Balances::free_balance(alice), 998);
 
 		// Check event was emitted
 		System::assert_has_event(RuntimeEvent::QuantumVault(Event::VaultCreated {
@@ -91,7 +93,7 @@ fn create_vault_fails_with_wrong_key_size() {
 #[test]
 fn create_vault_fails_with_insufficient_balance() {
 	new_test_ext().execute_with(|| {
-		let dave = 4; // Dave only has 5 units, needs 10 for vault
+		let dave = 4; // Dave only has 1 unit (existential), needs 2 for vault
 		let public_key = mock_public_key();
 
 		// Currency::transfer returns Token::FundsUnavailable when balance is insufficient
@@ -119,10 +121,10 @@ fn vault_transfer_works_with_real_signature() {
 			public_key
 		));
 
-		// Alice has 990 after vault creation fee (10 units to treasury)
-		assert_eq!(Balances::free_balance(alice), 990);
+		// Alice has 998 after vault creation fee (2 units to treasury)
+		assert_eq!(Balances::free_balance(alice), 998);
 		// Treasury received creation fee
-		assert_eq!(Balances::free_balance(TREASURY), 1 + 10); // initial + fee
+		assert_eq!(Balances::free_balance(TREASURY), 1 + CREATION_FEE);
 
 		// Create REAL Dilithium signature for transfer
 		let transfer_amount = 100u64;
@@ -138,18 +140,18 @@ fn vault_transfer_works_with_real_signature() {
 		));
 
 		// Balances should be updated:
-		// Alice: 990 - 100 (transfer) - 100 (premium) = 790
+		// Alice: 998 - 100 (transfer) - 10 (premium) = 888
 		// Bob: 500 + 100 = 600
-		// Treasury: 11 + 100 (premium) = 111
-		assert_eq!(Balances::free_balance(alice), 790);
+		// Treasury: 1 + 2 (creation) + 10 (premium) = 13
+		assert_eq!(Balances::free_balance(alice), 888);
 		assert_eq!(Balances::free_balance(bob), 600);
-		assert_eq!(Balances::free_balance(TREASURY), 111);
+		assert_eq!(Balances::free_balance(TREASURY), 13);
 
 		// Nonce should be incremented
 		assert_eq!(VaultNonces::<Test>::get(alice), 1);
 
 		// Total fees collected
-		assert_eq!(TotalFeesCollected::<Test>::get(), 10 + 100); // creation + premium
+		assert_eq!(TotalFeesCollected::<Test>::get(), CREATION_FEE + PREMIUM_FEE);
 
 		// Check event
 		System::assert_has_event(RuntimeEvent::QuantumVault(Event::VaultTransfer {
@@ -478,7 +480,7 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 			public_key
 		));
 
-		// First transfer (nonce = 0): 10 + 100 premium = 110
+		// First transfer (nonce = 0): 10 + 10 premium = 20
 		let sig1 = create_transfer_signature(alice, bob, 10, 0);
 		assert_ok!(QuantumVault::vault_transfer(
 			RuntimeOrigin::signed(alice),
@@ -488,7 +490,7 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 		));
 		assert_eq!(VaultNonces::<Test>::get(alice), 1);
 
-		// Second transfer with incremented nonce (nonce = 1): 20 + 100 premium = 120
+		// Second transfer with incremented nonce (nonce = 1): 20 + 10 premium = 30
 		let sig2 = create_transfer_signature(alice, bob, 20, 1);
 		assert_ok!(QuantumVault::vault_transfer(
 			RuntimeOrigin::signed(alice),
@@ -498,7 +500,7 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 		));
 		assert_eq!(VaultNonces::<Test>::get(alice), 2);
 
-		// Third transfer (nonce = 2): 30 + 100 premium = 130
+		// Third transfer (nonce = 2): 30 + 10 premium = 40
 		let sig3 = create_transfer_signature(alice, bob, 30, 2);
 		assert_ok!(QuantumVault::vault_transfer(
 			RuntimeOrigin::signed(alice),
@@ -509,12 +511,12 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 		assert_eq!(VaultNonces::<Test>::get(alice), 3);
 
 		// Verify final balances
-		// Alice: 990 (after vault) - 110 - 120 - 130 = 630
+		// Alice: 998 (after vault) - 20 - 30 - 40 = 908
 		// Bob: 500 + 10 + 20 + 30 = 560
-		// Treasury: 1 + 10 (creation) + 300 (3x100 premium) = 311
-		assert_eq!(Balances::free_balance(alice), 630);
+		// Treasury: 1 + 2 (creation) + 30 (3x10 premium) = 33
+		assert_eq!(Balances::free_balance(alice), 908);
 		assert_eq!(Balances::free_balance(bob), 560);
-		assert_eq!(Balances::free_balance(TREASURY), 311);
+		assert_eq!(Balances::free_balance(TREASURY), 33);
 	});
 }
 
@@ -537,7 +539,7 @@ fn vault_creation_fee_goes_to_treasury() {
 		));
 
 		// Treasury should have received the fee
-		assert_eq!(Balances::free_balance(TREASURY), treasury_before + 10);
+		assert_eq!(Balances::free_balance(TREASURY), treasury_before + CREATION_FEE);
 
 		// Total issuance should remain the same (not burned!)
 		let total_after = Balances::total_issuance();

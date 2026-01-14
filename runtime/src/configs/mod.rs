@@ -472,20 +472,28 @@ impl pallet_dynamic_fee::Config for Runtime {
 use super::TSRX;
 
 parameter_types! {
-	/// Fee to create a quantum vault: 10 TSRX (sent to treasury)
-	pub const VaultCreationFee: Balance = 10 * TSRX;
-	/// Fee multiplier for vault transfers: 100x
-	pub const VaultTransferFeeMultiplier: u32 = 100;
+	/// Fee to create a quantum vault: 2 TSRX (reduced from 10 TSRX)
+	/// Rationale: With ~13.82M supply, lower fee improves retail adoption
+	/// while still preventing spam (whitepaper v3.0)
+	pub const VaultCreationFee: Balance = 2 * TSRX;
+	
+	/// Fee multiplier for vault transfers: 10x (reduced from 100x)
+	/// Premium = 0.01 TSRX * 10 = 0.1 TSRX per vault transfer
+	/// Rationale: More realistic cost while compensating for heavy Dilithium verification
+	pub const VaultTransferFeeMultiplier: u32 = 10;
+	
 	/// Base fee for vault transfer premium: 0.01 TSRX
-	/// Premium = 0.01 TSRX * 100 = 1 TSRX per vault transfer
+	/// Combined with 10x multiplier = 0.1 TSRX per transfer
 	pub const VaultTransferBaseFee: Balance = TSRX / 100;
+	
 	/// Maximum public key size: Dilithium2 = 1312 bytes
 	pub const MaxPublicKeySize: u32 = 1312;
 	/// Maximum signature size: Dilithium2 = 2420 bytes
 	pub const MaxSignatureSize: u32 = 2420;
+	
 	/// Protocol treasury account for vault fees
-	/// Uses a deterministic address: "modl" + "tesserax" + zeros
-	/// This can be changed to a governance-controlled multisig later
+	/// Uses a deterministic address: "tesserax/vault_treasury"
+	/// Future: Can be changed to governance-controlled multisig
 	pub TreasuryAccountId: AccountId = {
 		// Create a deterministic treasury address
 		// Format: "tesserax/vault_treasury" padded to 32 bytes

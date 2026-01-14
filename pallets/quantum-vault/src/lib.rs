@@ -10,9 +10,9 @@
 //! ## Features
 //!
 //! - **Quantum-Resistant Cold Storage**: Protect holdings against future quantum attacks
-//! - **High Security Fee**: 10 TSRX to create a vault (spam prevention)
-//! - **Premium Transfer Fee**: 100x base fee for vault transfers
-//! - **Transfer Blocking**: Standard `pallet_balances::transfer` blocked for vault accounts
+//! - **Accessible Security Fee**: 2 TSRX to create a vault (reduced for retail adoption)
+//! - **Premium Transfer Fee**: 0.1 TSRX per vault transfer (10x base fee)
+//! - **Treasury-Based Fees**: All fees preserved in protocol treasury, not burned
 //!
 //! ## Post-Quantum Cryptography
 //!
@@ -27,9 +27,10 @@
 //! ## Usage
 //!
 //! 1. User generates Dilithium keypair offline
-//! 2. User calls `create_vault(public_key)` with 10 TSRX fee
+//! 2. User calls `create_vault(public_key)` with 2 TSRX fee
 //! 3. Account becomes a "vault" - standard transfers blocked
 //! 4. To transfer, user signs message offline and calls `vault_transfer(signature, to, amount)`
+//!    - Pays 0.1 TSRX premium fee (in addition to transfer amount)
 //! 5. User can call `destroy_vault()` to unlock the account
 
 #![cfg_attr(not(feature = "std"), no_std)]
