@@ -11,8 +11,8 @@ fn test_emission_constants() {
 		assert_eq!(BLOCKS_PER_ERA, 14400);
 		assert_eq!(REWARD_SCHEDULE.len(), TOTAL_ERAS);
 		
-		// Verify MAX_SUPPLY matches runtime constant
-		assert_eq!(MAX_SUPPLY, 13_817_422_000_000_000_000_000_000);
+		// Verify MAX_SUPPLY matches runtime constant (v3.0)
+		assert_eq!(MAX_SUPPLY, 13_817_580_000_000_000_000_000_000);
 	});
 }
 
@@ -147,7 +147,7 @@ fn test_max_supply_helper() {
 	new_test_ext().execute_with(|| {
 		let max = Emission::max_supply();
 		assert_eq!(max, MAX_SUPPLY);
-		assert_eq!(max, 13_817_422_000_000_000_000_000_000);
+		assert_eq!(max, 13_817_580_000_000_000_000_000_000);
 	});
 }
 

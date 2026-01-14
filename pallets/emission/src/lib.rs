@@ -1,7 +1,7 @@
-//! # Tesserax Emission Pallet (v2.0)
+//! # Tesserax Emission Pallet (v3.0)
 //!
 //! A **stateless** pallet that distributes block rewards according to a
-//! pre-computed sigmoid emission schedule.
+//! pre-computed sigmoid emission schedule, plus a one-time bonus mint.
 //!
 //! ## Design Philosophy
 //!
@@ -12,6 +12,7 @@
 //! 2. Reward per era is stored in a constant array
 //! 3. On each block, the pallet looks up the current era's reward
 //! 4. Reward is minted and given to the block author
+//! 5. After emission ends, a bonus of 627 TSRX is minted once
 //!
 //! ## Why Pre-computed?
 //!
@@ -26,8 +27,9 @@
 //! - Years 0-5: Rewards increase (early adopter incentive)
 //! - Year 10: Peak rewards (~0.66 TSRX/block)
 //! - Years 15-20: Rewards decrease (scarcity phase)
+//! - Post-Year 20: Bonus mint of 627 TSRX (one-time only)
 //!
-//! Total supply asymptotically approaches 13,817,580 TSRX (π × e × φ × 10^6)
+//! Total supply reaches exactly 13,817,580 TSRX (π × e × φ × 10^6)
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
@@ -90,9 +92,14 @@ pub mod pallet {
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // NO STORAGE - This pallet is stateless!
-    // The emission table is a compile-time constant, not runtime storage.
+    // STORAGE
     // ═══════════════════════════════════════════════════════════════════════
+
+    /// Flag to track if bonus has been minted (one-time only)
+    /// This ensures the 627 TSRX bonus is only minted once after emission ends
+    #[pallet::storage]
+    #[pallet::getter(fn bonus_minted)]
+    pub type BonusMinted<T> = StorageValue<_, bool, ValueQuery>;
 
     // ═══════════════════════════════════════════════════════════════════════
     // EVENTS
@@ -113,6 +120,13 @@ pub mod pallet {
         EmissionEnded {
             block_number: BlockNumberFor<T>,
             total_eras: u32,
+        },
+
+        /// Bonus amount minted to reach 100% of max supply
+        BonusMinted {
+            block_number: BlockNumberFor<T>,
+            recipient: T::AccountId,
+            amount: BalanceOf<T>,
         },
     }
 
@@ -147,7 +161,44 @@ pub mod pallet {
             
             // Check if we're still within the emission schedule
             if (current_era as usize) >= TOTAL_ERAS {
-                // Emission has ended
+                // Emission has ended - check if bonus needs to be minted
+                if !BonusMinted::<T>::get() {
+                    // Mint bonus amount once to reach 100% of max supply
+                    let bonus: BalanceOf<T> = match BONUS_AMOUNT.try_into() {
+                        Ok(b) => b,
+                        Err(_) => return T::WeightInfo::on_initialize_no_reward(),
+                    };
+
+                    // Find the block author (or use first validator if not found)
+                    let digests: alloc::vec::Vec<(frame_support::ConsensusEngineId, &[u8])> = Default::default();
+                    let recipient = match T::FindAuthor::find_author(digests) {
+                        Some(author) => author,
+                        None => return T::WeightInfo::on_initialize_no_reward(),
+                    };
+
+                    // Mint the bonus
+                    let imbalance = T::Currency::deposit_creating(&recipient, bonus);
+                    drop(imbalance);
+
+                    // Set flag to prevent duplicate minting
+                    BonusMinted::<T>::put(true);
+
+                    // Emit events
+                    Self::deposit_event(Event::BonusMinted {
+                        block_number,
+                        recipient: recipient.clone(),
+                        amount: bonus,
+                    });
+
+                    Self::deposit_event(Event::EmissionEnded {
+                        block_number,
+                        total_eras: TOTAL_ERAS as u32,
+                    });
+
+                    return T::WeightInfo::on_initialize_with_reward();
+                }
+
+                // Bonus already minted
                 if block_num % BLOCKS_PER_ERA == 1 {
                     // Only emit event once per era
                     Self::deposit_event(Event::EmissionEnded {
