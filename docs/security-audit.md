@@ -139,7 +139,7 @@ fn verify_signature(public_key: &[u8], message: &[u8], signature: &[u8]) -> bool
 
 | Parameter | Value | Rationale |
 |-----------|-------|-----------|
-| Max Supply | 13,817,422 TSRX | Derived from π × e × φ × 10^6 |
+| Max Supply | 13,817,580 TSRX | Derived from π × e × φ × 10^6 |
 | Emission Duration | 20 years | Long-term distribution |
 | Peak Emission | Year 10 | Sigmoid curve midpoint |
 | Vault Creation Fee | 10 TSRX | Spam prevention, deflationary |

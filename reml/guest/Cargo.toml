@@ -1,0 +1,20 @@
+[package]
+name = "reml-guest"
+description = "Re-ML zkVM Guest Program - Verifies ML-DSA signatures inside SP1"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+# SP1 zkVM runtime
+sp1-zkvm = { workspace = true }
+
+# Shared types
+reml-lib = { workspace = true }
+
+# Serialization (no_std compatible)
+serde = { workspace = true }
+bincode = { workspace = true }
+
+# Note: We cannot use pqcrypto-dilithium directly in zkVM
+# The verification logic is implemented manually using SP1 precompiles

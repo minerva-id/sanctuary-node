@@ -31,6 +31,9 @@ pqc_dilithium = { workspace = true, optional = true }
 # Token operations
 pallet-balances = { workspace = true }
 
+# Re-ML verification integration
+pallet-reml-verifier = { workspace = true }
+
 [dev-dependencies]
 sp-io = { workspace = true }
 
@@ -46,6 +49,7 @@ std = [
     "sp-core/std",
     "sp-io/std",
     "pallet-balances/std",
+    "pallet-reml-verifier/std",
     "log/std",
     "hex/std",
     # Enable pqc_dilithium only in std mode

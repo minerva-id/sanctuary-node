@@ -22,6 +22,7 @@ frame_support::construct_runtime!(
 	pub enum Test {
 		System: frame_system,
 		Balances: pallet_balances,
+		ReMLVerifier: pallet_reml_verifier,
 		QuantumVault: pallet_quantum_vault,
 	}
 );
@@ -65,6 +66,16 @@ parameter_types! {
 	pub const MaxSignatureSize: u32 = 2420;
 	/// Treasury account for test (account 99)
 	pub const TreasuryAccountId: u64 = 99;
+	/// Max aggregators for Re-ML (test value)
+	pub const MaxAggregators: u32 = 10;
+	/// Expected VKey hash (zeros for testing)
+	pub const ExpectedVKeyHash: [u8; 32] = [0u8; 32];
+}
+
+impl pallet_reml_verifier::Config for Test {
+	type WeightInfo = ();
+	type MaxAggregators = MaxAggregators;
+	type ExpectedVKeyHash = ExpectedVKeyHash;
 }
 
 impl pallet_quantum_vault::Config for Test {

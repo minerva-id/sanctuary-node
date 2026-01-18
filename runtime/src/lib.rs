@@ -8,6 +8,7 @@ pub mod apis;
 mod benchmarks;
 pub mod configs;
 pub mod vault_blocker;
+pub mod precompiles;
 
 #[cfg(test)]
 mod integration_tests;
@@ -50,20 +51,20 @@ pub mod tesserax_constants {
 
     /// The Tesserax Constant: π × e × φ ≈ 13.817422188
     /// This represents the "Volume Ideal" - a theoretical block with sides π, e, and φ
-    pub const TESSERAX_CONSTANT: u128 = 13_817_422_188;
+    pub const TESSERAX_CONSTANT: u128 = 13_817_580_426;
 
     /// Maximum Supply of $TSRX tokens (in whole units)
-    /// S_max = floor(π × e × φ × 10^6) = 13,817,422 TSRX
+    /// S_max = floor(π × e × φ × 10^6) = 13,817,580 TSRX
     /// 
     /// This is the asymptotic limit that supply approaches as time → ∞
     /// Unlike Bitcoin's hard cap, this is approached via sigmoid curve, never abruptly reached.
     pub const MAX_SUPPLY_UNITS: u128 = 13_817_422;
 
     /// Maximum Supply in smallest indivisible units (planck)
-    /// 13,817,422 TSRX × 10^18 decimals = 13,817,422 × 10^18 planck
+    /// 13,817,580 TSRX × 10^18 decimals = 13,817,580 × 10^18 planck
     /// 
     /// We use 18 decimals for EVM compatibility (like ETH's wei)
-    pub const MAX_SUPPLY: Balance = 13_817_422_000_000_000_000_000_000;
+    pub const MAX_SUPPLY: Balance = 13_817_580_000_000_000_000_000_000;
 
     /// Token decimals (18 for EVM compatibility)
     pub const TOKEN_DECIMALS: u8 = 18;
@@ -410,4 +411,11 @@ mod runtime {
 
 	#[runtime::pallet_index(15)]
 	pub type QuantumVault = pallet_quantum_vault;
+
+	// ═══════════════════════════════════════════════════════════════════════
+	// RE-ML VERIFIER (Recursive-STARK ML-DSA Proof Verification)
+	// ═══════════════════════════════════════════════════════════════════════
+
+	#[runtime::pallet_index(16)]
+	pub type RemlVerifier = pallet_reml_verifier;
 }

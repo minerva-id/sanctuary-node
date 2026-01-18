@@ -13,13 +13,13 @@ import math
 # ═══════════════════════════════════════════════════════════════════════════
 # UNIVERSAL CONSTANTS (The DNA of Sanctuary)
 # ═══════════════════════════════════════════════════════════════════════════
-PI  = 3.1415926535
-E   = 2.7182818284
-PHI = 1.6180339887
+PI  = math.pi        # 3.141592653589793
+E   = math.e         # 2.718281828459045
+PHI = (1 + math.sqrt(5)) / 2  # 1.618033988749895
 
 # Maximum Supply in smallest units (18 decimals like ETH)
 # S_MAX = floor(π × e × φ × 10^6) × 10^18
-S_MAX_UNITS = int(math.floor(PI * E * PHI * 1_000_000))  # 13,817,422
+S_MAX_UNITS = int(math.floor(PI * E * PHI * 1_000_000))  # 13,817,580
 S_MAX = S_MAX_UNITS * (10**18)  # In planck (smallest unit)
 
 # ═══════════════════════════════════════════════════════════════════════════

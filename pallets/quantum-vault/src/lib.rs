@@ -99,7 +99,7 @@ pub mod pallet {
 	/// 
 	/// Note: `RuntimeEvent: From<Event<Self>>` is automatically appended by the pallet macro.
 	#[pallet::config]
-	pub trait Config: frame_system::Config {
+	pub trait Config: frame_system::Config + pallet_reml_verifier::Config {
 
 		/// The currency mechanism for fee payment
 		type Currency: Currency<Self::AccountId> + ReservableCurrency<Self::AccountId>;
@@ -199,6 +199,12 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			nonce: u64,
 			premium_fee: BalanceOf<T>,
+			request_id: Option<u64>,
+		},
+		/// A vault transfer was verified via Re-ML
+		VaultTransferVerified {
+			from: T::AccountId,
+			request_id: u64,
 		},
 		/// Fees were collected and sent to treasury
 		/// reason: 0 = VaultCreation, 1 = VaultTransferPremium
@@ -245,6 +251,10 @@ pub mod pallet {
 		PublicKeyTooLarge,
 		/// Signature size exceeds maximum
 		SignatureTooLarge,
+		/// Re-ML verification required but request ID not verified
+		ReMLVerificationRequired,
+		/// Request ID not found in Re-ML verifier
+		RequestNotVerified,
 	}
 
 	// ═══════════════════════════════════════════════════════════════════════════
@@ -270,7 +280,7 @@ pub mod pallet {
 		/// * `InsufficientBalanceForFee` - Cannot pay creation fee
 		/// * `InvalidPublicKey` - Public key has wrong format
 		#[pallet::call_index(0)]
-		#[pallet::weight(T::WeightInfo::create_vault())]
+		#[pallet::weight(<T as Config>::WeightInfo::create_vault())]
 		pub fn create_vault(
 			origin: OriginFor<T>,
 			public_key: Vec<u8>,
@@ -346,7 +356,7 @@ pub mod pallet {
 		/// * `NotVault` - Account is not a vault
 		/// * `SignatureVerificationFailed` - Invalid signature
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::WeightInfo::destroy_vault())]
+		#[pallet::weight(<T as Config>::WeightInfo::destroy_vault())]
 		pub fn destroy_vault(
 			origin: OriginFor<T>,
 			signature: Vec<u8>,
@@ -388,29 +398,38 @@ pub mod pallet {
 		///
 		/// This is the only way to transfer funds from a vault account.
 		/// Requires a valid Dilithium signature of the transfer details.
+		/// Optionally requires Re-ML verification via request_id.
 		///
 		/// # Arguments
 		/// * `signature` - Dilithium signature of "TRANSFER:{to}:{amount}:{nonce}"
 		/// * `to` - Destination account
 		/// * `amount` - Amount to transfer
+		/// * `request_id` - Optional Re-ML request ID for quantum-safe verification
 		///
 		/// # Fees
 		/// * Premium fee = VaultTransferBaseFee × VaultTransferFeeMultiplier
 		/// * Default: 0.01 TSRX × 100 = 1 TSRX per vault transfer
 		/// * Fee is sent to protocol treasury
 		///
+		/// # Re-ML Integration
+		/// If `request_id` is provided, the transfer will be verified against
+		/// the Re-ML verifier pallet. This enables EVM smart contracts to
+		/// enforce quantum-safe transfer requirements.
+		///
 		/// # Errors
 		/// * `NotVault` - Sender is not a vault
 		/// * `SignatureVerificationFailed` - Invalid signature
 		/// * `InsufficientBalance` - Not enough balance for transfer
 		/// * `InsufficientBalanceForPremium` - Not enough balance for premium fee
+		/// * `RequestNotVerified` - Re-ML request ID not verified
 		#[pallet::call_index(2)]
-		#[pallet::weight(T::WeightInfo::vault_transfer())]
+		#[pallet::weight(<T as Config>::WeightInfo::vault_transfer())]
 		pub fn vault_transfer(
 			origin: OriginFor<T>,
 			signature: Vec<u8>,
 			to: T::AccountId,
 			#[pallet::compact] amount: BalanceOf<T>,
+			request_id: Option<u64>,
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 
@@ -431,6 +450,26 @@ pub mod pallet {
 
 			// Verify signature
 			Self::verify_dilithium_signature(&public_key, &message, &signature)?;
+
+			// Re-ML Integration: If request_id is provided, verify it
+			if let Some(req_id) = request_id {
+				ensure!(
+					pallet_reml_verifier::Pallet::<T>::is_request_verified(req_id),
+					Error::<T>::RequestNotVerified
+				);
+				
+				log::info!(
+					target: "quantum-vault",
+					"✅ Re-ML verification passed for request ID: {}",
+					req_id
+				);
+				
+				// Emit verification event
+				Self::deposit_event(Event::VaultTransferVerified {
+					from: who.clone(),
+					request_id: req_id,
+				});
+			}
 
 			// Calculate premium fee: base_fee × multiplier
 			// This goes to treasury as security premium for using quantum vault
@@ -480,6 +519,7 @@ pub mod pallet {
 				amount,
 				nonce,
 				premium_fee,
+				request_id,
 			});
 
 			log::info!(

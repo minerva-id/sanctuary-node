@@ -136,7 +136,8 @@ fn vault_transfer_works_with_real_signature() {
 			RuntimeOrigin::signed(alice),
 			signature,
 			bob,
-			transfer_amount
+			transfer_amount,
+			None // No Re-ML  verification
 		));
 
 		// Balances should be updated:
@@ -160,6 +161,7 @@ fn vault_transfer_works_with_real_signature() {
 			amount: transfer_amount,
 			nonce: 0,
 			premium_fee: PREMIUM_FEE,
+			request_id: None,
 		}));
 	});
 }
@@ -172,7 +174,7 @@ fn vault_transfer_fails_for_non_vault() {
 		let signature = vec![0u8; 2420]; // Wrong signature but right size
 
 		assert_noop!(
-			QuantumVault::vault_transfer(RuntimeOrigin::signed(alice), signature, bob, 100),
+			QuantumVault::vault_transfer(RuntimeOrigin::signed(alice), signature, bob, 100, None),
 			Error::<Test>::NotVault
 		);
 	});
@@ -194,7 +196,7 @@ fn vault_transfer_fails_with_wrong_signature_size() {
 		// Wrong signature size
 		let bad_signature = vec![0u8; 100];
 		assert_noop!(
-			QuantumVault::vault_transfer(RuntimeOrigin::signed(alice), bad_signature, bob, 100),
+			QuantumVault::vault_transfer(RuntimeOrigin::signed(alice), bad_signature, bob, 100, None),
 			Error::<Test>::InvalidSignature
 		);
 	});
@@ -223,7 +225,8 @@ fn vault_transfer_fails_with_invalid_signature() {
 				RuntimeOrigin::signed(alice),
 				invalid_signature,
 				bob,
-				100
+				100,
+				None
 			),
 			Error::<Test>::SignatureVerificationFailed
 		);
@@ -249,7 +252,8 @@ fn vault_transfer_fails_with_wrong_nonce_replay_attack() {
 			RuntimeOrigin::signed(alice),
 			sig1,
 			bob,
-			50
+			50,
+			None
 		));
 
 		// Nonce is now 1
@@ -263,7 +267,8 @@ fn vault_transfer_fails_with_wrong_nonce_replay_attack() {
 				RuntimeOrigin::signed(alice),
 				replay_sig,
 				bob,
-				50
+				50,
+				None
 			),
 			Error::<Test>::SignatureVerificationFailed
 		);
@@ -293,7 +298,8 @@ fn vault_transfer_fails_with_tampered_amount() {
 				RuntimeOrigin::signed(alice),
 				signature,
 				bob,
-				100 // Different amount than signed!
+				100, // Different amount than signed!
+				None
 			),
 			Error::<Test>::SignatureVerificationFailed
 		);
@@ -324,7 +330,8 @@ fn vault_transfer_fails_with_tampered_recipient() {
 				RuntimeOrigin::signed(alice),
 				signature,
 				charlie, // Different recipient than signed!
-				50
+				50,
+				None
 			),
 			Error::<Test>::SignatureVerificationFailed
 		);
@@ -486,7 +493,8 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 			RuntimeOrigin::signed(alice),
 			sig1,
 			bob,
-			10
+			10,
+			None
 		));
 		assert_eq!(VaultNonces::<Test>::get(alice), 1);
 
@@ -496,7 +504,8 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 			RuntimeOrigin::signed(alice),
 			sig2,
 			bob,
-			20
+			20,
+			None
 		));
 		assert_eq!(VaultNonces::<Test>::get(alice), 2);
 
@@ -506,7 +515,8 @@ fn multiple_vault_transfers_with_incrementing_nonce() {
 			RuntimeOrigin::signed(alice),
 			sig3,
 			bob,
-			30
+			30,
+			None
 		));
 		assert_eq!(VaultNonces::<Test>::get(alice), 3);
 
@@ -577,7 +587,8 @@ fn signature_verification_is_strict() {
 				RuntimeOrigin::signed(alice),
 				signature,
 				bob,
-				100
+				100,
+				None
 			),
 			Error::<Test>::SignatureVerificationFailed
 		);

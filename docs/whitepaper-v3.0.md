@@ -46,7 +46,7 @@ With precision values:
 
 Thus, the protocol's supply limit is permanently set at:
 
-**13,817,422 TSRX**
+**13,817,580 TSRX**
 
 ### **2.2. Deterministic Emission**
 

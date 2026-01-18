@@ -6879,8 +6879,23 @@ dependencies = [
  "hex",
  "log",
  "pallet-balances",
+ "pallet-reml-verifier",
  "parity-scale-codec",
  "pqc_dilithium",
+ "scale-info",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+]
+
+[[package]]
+name = "pallet-reml-verifier"
+version = "0.1.0"
+dependencies = [
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "parity-scale-codec",
  "scale-info",
  "sp-core",
  "sp-io",
@@ -12009,6 +12024,7 @@ dependencies = [
  "pallet-evm-precompile-simple",
  "pallet-grandpa",
  "pallet-quantum-vault",
+ "pallet-reml-verifier",
  "pallet-sudo",
  "pallet-template",
  "pallet-timestamp",

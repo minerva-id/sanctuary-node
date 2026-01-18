@@ -16,7 +16,7 @@ use sp_api::ProvideRuntimeApi;
 use sp_block_builder::BlockBuilder;
 use sp_blockchain::{Error as BlockChainError, HeaderBackend, HeaderMetadata};
 
-/// Tesserax Chain ID: 13817 (derived from floor(π × e × φ × 10^6) = 13,817,422)
+/// Tesserax Chain ID: 13817 (derived from floor(π × e × φ × 10^6) = 13,817,580)
 pub const CHAIN_ID: u64 = 13817;
 
 /// Full client dependencies.

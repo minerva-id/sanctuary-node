@@ -202,7 +202,7 @@ polkadot-js-api --ws wss://testnet.tesserax.network/ws \
 
 The testnet uses the same sigmoid emission curve as mainnet:
 
-- **Max Supply:** 13,817,422 TSRX
+- **Max Supply:** 13,817,580 TSRX
 - **Duration:** 20 years (7,300 eras)
 - **Era Length:** 14,400 blocks (~24 hours)
 - **Peak Rewards:** Era 3,650 (Year 10)
