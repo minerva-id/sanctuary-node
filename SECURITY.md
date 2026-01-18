@@ -30,27 +30,47 @@ When reporting a vulnerability, please include:
 | **Fix Development** | Varies by severity |
 | **Public Disclosure** | After fix is deployed |
 
-## 🏆 Bug Bounty Program
+## 🏆 Responsible Security Disclosure
 
-Tesserax Protocol operates a bug bounty program to reward security researchers.
+Tesserax Protocol values the security research community and recognizes responsible disclosure.
 
-### Eligibility
+### Recognition Program
+
+Security researchers who responsibly disclose vulnerabilities will receive:
+
+- **Public Recognition**: Listed in our Security Hall of Fame
+- **Contributor Credits**: Acknowledged in release notes and CHANGELOG
+- **Priority Support**: Direct communication channel with core team
+- **Early Access**: Beta access to new features and testnets
+- **Community Role**: Special Discord/Telegram role for contributors
+
+### Severity Classification
+
+We classify vulnerabilities to prioritize response:
+
+| Severity | Examples | Response Priority |
+|----------|----------|-------------------|
+| **Critical** | Consensus break, unauthorized minting, cryptographic breaks | Immediate (24h) |
+| **High** | Signature bypass, replay attacks, vault compromise | Urgent (72h) |
+| **Medium** | DoS vectors, RPC exploits, storage corruption | High (1 week) |
+| **Low** | Information disclosure, minor logic errors | Normal (2 weeks) |
+
+### Future Bug Bounty Program
+
+We plan to launch a funded bug bounty program after:
+- Mainnet launch
+- Treasury funding secured
+- Governance framework established
+
+Stay tuned for announcements!
+
+### Eligibility for Recognition
 
 - Vulnerabilities in the latest release
 - Not previously reported
-- Follows responsible disclosure
+- Follows responsible disclosure process
 - Not result of social engineering
-
-### Reward Structure
-
-| Severity | Reward Range | Examples |
-|----------|--------------|----------|
-| **Critical** | $5,000 - $10,000 | Consensus break, unauthorized minting, cryptographic breaks |
-| **High** | $1,000 - $5,000 | Signature bypass, replay attacks, vault compromise |
-| **Medium** | $500 - $1,000 | DoS vectors, RPC exploits, storage corruption |
-| **Low** | $100 - $500 | Information disclosure, minor logic errors |
-
-*Rewards paid in TSRX tokens at time of disclosure*
+- Provides clear reproduction steps
 
 ### Out of Scope
 
@@ -59,6 +79,7 @@ Tesserax Protocol operates a bug bounty program to reward security researchers.
 - Social engineering attacks
 - Physical attacks
 - Issues in third-party dependencies (report to upstream)
+
 
 ## 🛡️ Security Best Practices
 

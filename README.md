@@ -4,7 +4,7 @@
 
 **Adaptive Scarcity & Quantum-Resistant Blockchain**
 
-[![License](https://img.shields.io/badge/license-MIT--0-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Built with Substrate](https://img.shields.io/badge/Built%20with-Substrate-e6007a)](https://substrate.io/)
 [![EVM Compatible](https://img.shields.io/badge/EVM-Compatible-3C3C3D)](https://ethereum.org/)
 [![Quantum Ready](https://img.shields.io/badge/Quantum-Resistant-00D4AA)](https://csrc.nist.gov/projects/post-quantum-cryptography)
@@ -31,6 +31,7 @@ Tesserax Protocol is a next-generation blockchain built on Substrate, featuring:
 |---------|-------------|
 | 🔢 **Adaptive Scarcity** | Supply derived from universal constants (π × e × φ) |
 | 🔐 **Quantum Vault** | Post-quantum cryptographic cold storage (CRYSTALS-Dilithium) |
+| 🔬 **Re-ML System** | STARK-based ML-DSA signature compression (~24x) |
 | ⚡ **Aura + GRANDPA** | Fast block production with deterministic finality |
 | 📈 **Sigmoid Emission** | Natural growth curve - no harsh halvings |
 | 🔗 **Full EVM** | Deploy Solidity contracts via Metamask |
@@ -54,11 +55,12 @@ Where:
 
 - Rust (stable 1.70+)
 - Protobuf compiler
+- (Optional) SP1 toolchain for Re-ML development
 
 ### Build
 
 ```bash
-git clone https://github.com/tesserax-protocol/tesserax-node.git
+git clone https://github.com/Tesserax-Protocol/tesserax-node.git
 cd tesserax-node
 cargo build --release
 ```
@@ -75,8 +77,10 @@ cargo build --release
 # All tests
 cargo test
 
-# Quantum Vault tests
+# Specific pallet tests
 cargo test -p pallet-quantum-vault
+cargo test -p pallet-emission
+cargo test -p pallet-reml-verifier
 ```
 
 ---
@@ -85,12 +89,14 @@ cargo test -p pallet-quantum-vault
 
 | Document | Description |
 |----------|-------------|
-| 📄 **[Whitepaper v2.0](docs/whitepaper-v2.0.md)** | Complete technical specification and philosophy |
-| 🗺️ **[Blueprint](docs/blueprint.md)** | Implementation plan and roadmap |
+| 📄 **[Whitepaper v3.0](docs/whitepaper-v3.0.md)** | Complete technical specification and philosophy |
+| � **[Re-ML Architecture](docs/Re-ML.md)** | STARK-based signature compression system |
+| �🗺️ **[Blueprint](docs/blueprint.md)** | Implementation plan and roadmap |
 | 🚀 **[Testnet Guide](docs/testnet-guide.md)** | How to connect and use the public testnet |
 | 📖 **[API Reference](docs/api-reference.md)** | Complete API documentation for all pallets |
 | 📊 **[Test Results](docs/test-results.md)** | Quality report and test coverage |
 | 🔐 **[Security Audit](docs/security-audit.md)** | Security architecture and audit readiness |
+| 🤝 **[Contributing](CONTRIBUTING.md)** | How to contribute to the project |
 
 ---
 
@@ -102,6 +108,7 @@ cargo test -p pallet-quantum-vault
 |--------|-------------|
 | `pallet-emission` | Sigmoid emission curve - pre-computed block rewards |
 | `pallet-quantum-vault` | Post-quantum cryptographic cold storage |
+| `pallet-reml-verifier` | STARK proof verification for ML-DSA signatures |
 | `pallet-evm` | Full Ethereum Virtual Machine compatibility |
 | `pallet-ethereum` | Ethereum block/transaction compatibility |
 
@@ -115,14 +122,15 @@ The Quantum Vault provides **post-quantum cryptographic (PQC) protection** for T
 - **Signature**: 2,420 bytes
 
 #### Features:
-- **10 TSRX** to create a vault (spam prevention)
-- **100x fee** for vault transfers (security premium)
+- **2 TSRX** to create a vault (accessible retail pricing)
+- **0.1 TSRX** premium fee for vault transfers (10x base fee)
 - **Standard transfers blocked** for vault accounts
 - **Nonce-based** replay attack prevention
+- **Optional Re-ML verification** for enhanced security
 
 #### Usage:
 ```rust
-// 1. Generate Dilithium2 keypair offline (using pqcrypto library)
+// 1. Generate Dilithium2 keypair offline
 let (pk, sk) = dilithium2::keypair();
 
 // 2. Create vault with public key
@@ -132,9 +140,26 @@ QuantumVault::create_vault(origin, pk.as_bytes().to_vec());
 let message = format!("TESSERAX_VAULT_TRANSFER:{from}:{to}:{amount}:{nonce}");
 let signature = dilithium2::sign(&message, &sk);
 
-// 4. Execute vault transfer
-QuantumVault::vault_transfer(origin, signature, to, amount);
+// 4. Execute vault transfer (with optional Re-ML verification)
+QuantumVault::vault_transfer(
+    origin, 
+    signature, 
+    to, 
+    amount,
+    None  // or Some(request_id) for Re-ML verified transfer
+);
 ```
+
+### 🔬 Re-ML System
+
+**Re-ML** (Recursive-STARK ML-DSA) enables efficient batch verification of post-quantum signatures:
+
+- **Compression**: ~24x (2.4MB signatures → ~100KB STARK proof)
+- **Batch Size**: Up to 256 signatures per proof
+- **zkVM**: SP1 (Succinct Labs)
+- **EVM Integration**: ZK-Coprocessor precompiles (0x20, 0x21, 0x22)
+
+See [Re-ML Architecture](docs/Re-ML.md) for details.
 
 ---
 
@@ -157,6 +182,13 @@ Connect **Metamask** to Tesserax:
 - `net_listening` ✅
 - `web3_clientVersion` ✅
 
+### ZK-Coprocessor Precompiles:
+- `0x20`: VerifyStarkCommitment
+- `0x21`: IsRequestVerified
+- `0x22`: GetBatchInfo
+
+See [contracts/ReMLVerifier.sol](contracts/ReMLVerifier.sol) for Solidity integration examples.
+
 ---
 
 ## Architecture
@@ -168,21 +200,32 @@ tesserax-node/
 │   │   ├── chain_spec.rs    # Genesis configuration
 │   │   ├── service.rs       # Full node service
 │   │   ├── rpc.rs           # RPC endpoints (incl. Ethereum)
-│   │   └── eth.rs           # Frontier RPC (prepared)
+│   │   └── eth.rs           # Frontier RPC
 ├── pallets/
 │   ├── emission/            # Sigmoid emission curve
 │   ├── quantum-vault/       # PQC cold storage
 │   │   ├── src/lib.rs       # Pallet implementation
 │   │   ├── src/mock.rs      # Test mock runtime
-│   │   ├── src/tests.rs     # Unit tests (15 tests)
+│   │   ├── src/tests.rs     # Unit tests (22 tests)
 │   │   └── src/weights.rs   # Weight definitions
+│   ├── reml-verifier/       # STARK proof verification
 │   └── template/            # Example pallet
 ├── runtime/                 # Runtime configuration
 │   ├── src/lib.rs           # construct_runtime!
 │   ├── src/configs/         # Pallet configurations
+│   ├── src/precompiles.rs   # ZK-Coprocessor precompiles
 │   └── src/apis.rs          # Runtime APIs (EthereumRuntimeRPCApi)
-├── blueprint.md             # Implementation plan
-└── whitepaper-v2.0.md       # Technical specification
+├── reml/                    # Re-ML system
+│   ├── guest/               # SP1 zkVM guest program (ML-DSA verification)
+│   ├── host/                # Prover & aggregator server
+│   └── lib/                 # Shared types & merkle tree
+├── contracts/               # Solidity integration
+│   └── ReMLVerifier.sol     # EVM precompile interfaces
+├── docs/                    # Documentation
+│   ├── Re-ML.md             # Re-ML architecture
+│   ├── whitepaper-v3.0.md   # Technical specification
+│   └── ...
+└── scripts/                 # Build & utility scripts
 ```
 
 ---
@@ -242,19 +285,42 @@ Connect to [Polkadot.js Apps](https://polkadot.js.org/apps/?rpc=ws%3A%2F%2F127.0
 - [x] **Phase 1**: Foundation + Sigmoid Emission
 - [x] **Phase 2**: EVM Integration (Frontier)
 - [x] **Phase 3**: Quantum Vault (CRYSTALS-Dilithium)
-- [x] **Phase 4**: Testnet Hardening
-  - [x] Unit testing (19 tests passing)
+- [x] **Phase 4**: Re-ML System Implementation
+  - [x] SP1 zkVM guest program (Full ML-DSA verification)
+  - [x] Host prover & aggregator server
+  - [x] On-chain STARK verification pallet
+  - [x] ZK-Coprocessor EVM precompiles
+  - [x] Quantum Vault ↔ Re-ML integration
+- [x] **Phase 5**: Testnet Hardening
+  - [x] Unit testing (73+ tests passing)
   - [x] Benchmarking module setup
   - [x] Full Frontier RPC (eth_*, net_*, web3_*)
   - [x] Transfer blocking for vault accounts
+  - [x] Code quality audit (A+ grade)
   - [ ] Public testnet launch
-- [ ] **Phase 5**: Mainnet Preparation
+- [ ] **Phase 6**: Mainnet Preparation
+  - [ ] Professional security audit
+  - [ ] NPoS implementation
+  - [ ] Governance framework
+  - [ ] Mainnet launch
+
+---
+
+## Community & Contributing
+
+We welcome contributions from the community!
+
+- 📖 Read our [Contributing Guide](CONTRIBUTING.md)
+- 🐛 Report bugs via [GitHub Issues](https://github.com/Tesserax-Protocol/tesserax-node/issues)
+- 💡 Propose features via [GitHub Discussions](https://github.com/Tesserax-Protocol/tesserax-node/discussions)
+- 🔐 Report security issues to [security@tesserax.network](mailto:security@tesserax.network)
+- 🏆 Security researchers: See our [Responsible Disclosure Program](SECURITY.md)
 
 ---
 
 ## License
 
-MIT-0
+MIT
 
 ---
 
@@ -265,5 +331,7 @@ MIT-0
 *Where supply meets the universal constants*
 
 Built by **Minerva & Gemini** (The Architect)
+
+Maintained by the **Tesserax Protocol Community**
 
 </div>

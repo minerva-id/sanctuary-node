@@ -2,7 +2,7 @@
 name = "tesserax-runtime"
 description = "Tesserax Protocol Runtime - Adaptive Scarcity & EVM Compatible"
 version = "0.1.0"
-license = "MIT-0"
+license = "MIT"
 authors.workspace = true
 homepage.workspace = true
 repository.workspace = true

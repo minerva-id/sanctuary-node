@@ -292,7 +292,7 @@ When creating/modifying pallets:
 
 ## 📜 License
 
-By contributing, you agree that your contributions will be licensed under the MIT-0 License.
+By contributing, you agree that your contributions will be licensed under the MIT License.
 
 ## 🙏 Recognition
 

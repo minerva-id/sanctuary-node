@@ -1,5 +1,5 @@
 [workspace.package]
-license = "MIT-0"
+license = "MIT"
 authors = ["Minerva & Gemini (The Architect)"]
 homepage = "https://tesserax.network"
 repository = "https://github.com/tesserax-protocol/tesserax-node.git"
