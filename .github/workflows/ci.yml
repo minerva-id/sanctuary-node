@@ -7,78 +7,272 @@ on:
       - main
       - master
 
+# Add permissions for the workflow
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+env:
+  CARGO_TERM_COLOR: always
+
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-
-      - if: contains(matrix.os, 'ubuntu')
-        uses: ./.github/actions/free-disk-space
-      - if: contains(matrix.os, 'ubuntu')
-        uses: ./.github/actions/ubuntu-dependencies
-      - if: contains(matrix.os, 'macos')
-        uses: ./.github/actions/macos-dependencies
-
-      - name: Build Tesserax Node
-        run: cargo build
-        timeout-minutes: 90
-
-      - name: Run clippy
-        run: |
-          SKIP_WASM_BUILD=1 cargo clippy --all-targets --locked --workspace --quiet
-          SKIP_WASM_BUILD=1 cargo clippy --all-targets --all-features --locked --workspace --quiet
-        timeout-minutes: 30
-
-      - name: Run the tests
-        run: SKIP_WASM_BUILD=1 cargo test
-        timeout-minutes: 15
-
-      - name: Build the docs
-        run: SKIP_WASM_BUILD=1 cargo doc --workspace --no-deps
-        timeout-minutes: 15
-
-  run-node:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-
-      - if: contains(matrix.os, 'ubuntu')
-        uses: ./.github/actions/free-disk-space
-      - if: contains(matrix.os, 'ubuntu')
-        uses: ./.github/actions/ubuntu-dependencies
-      - if: contains(matrix.os, 'macos')
-        uses: ./.github/actions/macos-dependencies
-
-      - name: Build Tesserax Node in release mode
-        run: cargo build --package tesserax-node --release
-        timeout-minutes: 90
-
-      - name: Make sure the node is producing blocks
-        run: |
-          ./target/release/tesserax-node --dev 2>&1 | tee out.txt &
-          until curl -s '127.0.0.1:9944'; do sleep 5; done
-          until cat out.txt | grep -s "Imported #2"; do sleep 5; done
-        shell: bash
-        timeout-minutes: 5
-
-  build-docker:
+  fmt:
+    name: Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      
+      - name: Check formatting
+        run: cargo fmt --all -- --check
 
-      - uses: ./.github/actions/free-disk-space
+  clippy:
+    name: Clippy Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      
+      - name: Install Protobuf
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Run clippy
+        run: |
+          SKIP_WASM_BUILD=1 cargo clippy --all-targets --locked --workspace -- -D warnings
+          SKIP_WASM_BUILD=1 cargo clippy --all-targets --all-features --locked --workspace -- -D warnings
 
-      - name: Build the Dockerfile
-        run: docker build . -t tesserax/node:latest
+  test:
+    name: Test Suite
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install Protobuf (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      
+      - name: Install Protobuf (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install protobuf
+      
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Run tests
+        run: SKIP_WASM_BUILD=1 cargo test --workspace --locked
+        timeout-minutes: 30
+      
+      - name: Test Documentation
+        run: SKIP_WASM_BUILD=1 cargo test --doc --workspace --locked
+        timeout-minutes: 15
+
+  build:
+    name: Build Release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install Protobuf (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      
+      - name: Install Protobuf (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install protobuf
+      
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build release binary
+        run: cargo build --release --locked
         timeout-minutes: 90
+      
+      - name: Check binary exists
+        run: |
+          test -f target/release/tesserax-node
+          ./target/release/tesserax-node --version
+
+  runtime-smoke-test:
+    name: Runtime Smoke Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install Protobuf
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-release-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build release binary
+        run: cargo build --release --locked --package tesserax-node
+        timeout-minutes: 90
+      
+      - name: Start node and verify block production
+        run: |
+          ./target/release/tesserax-node --dev 2>&1 | tee node.log &
+          NODE_PID=$!
+          
+          # Wait for RPC to be ready
+          echo "Waiting for RPC endpoint..."
+          for i in {1..60}; do
+            if curl -s http://127.0.0.1:9944 > /dev/null 2>&1; then
+              echo "RPC endpoint is ready"
+              break
+            fi
+            sleep 1
+          done
+          
+          # Check block production
+          echo "Waiting for block production..."
+          for i in {1..60}; do
+            if grep -q "Imported #2" node.log; then
+              echo "Block production confirmed!"
+              kill $NODE_PID
+              exit 0
+            fi
+            sleep 1
+          done
+          
+          echo "Block production test failed"
+          kill $NODE_PID
+          cat node.log
+          exit 1
+        timeout-minutes: 5
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: tesserax/node:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+        timeout-minutes: 90
+      
+      - name: Test Docker image
+        run: |
+          docker run --rm tesserax/node:test --version
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+      
+      - name: Run security audit
+        run: cargo audit
+
+  docs:
+    name: Documentation Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      
+      - name: Install Protobuf
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+      
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-docs-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Build documentation
+        run: SKIP_WASM_BUILD=1 cargo doc --workspace --no-deps --locked
+        timeout-minutes: 30
