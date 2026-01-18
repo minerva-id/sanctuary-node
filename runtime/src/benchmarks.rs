@@ -34,16 +34,16 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 frame_benchmarking::define_benchmarks!(
-	// ── Core Substrate Pallets ──
-	[frame_benchmarking, BaselineBench::<Runtime>]
-	[frame_system, SystemBench::<Runtime>]
-	[frame_system_extensions, SystemExtensionsBench::<Runtime>]
-	[pallet_balances, Balances]
-	[pallet_timestamp, Timestamp]
-	[pallet_sudo, Sudo]
-	[pallet_template, Template]
-	
-	// ── Tesserax Custom Pallets ──
-	[pallet_quantum_vault, QuantumVault]
-	[pallet_emission, Emission]
+    // ── Core Substrate Pallets ──
+    [frame_benchmarking, BaselineBench::<Runtime>]
+    [frame_system, SystemBench::<Runtime>]
+    [frame_system_extensions, SystemExtensionsBench::<Runtime>]
+    [pallet_balances, Balances]
+    [pallet_timestamp, Timestamp]
+    [pallet_sudo, Sudo]
+    [pallet_template, Template]
+
+    // ── Tesserax Custom Pallets ──
+    [pallet_quantum_vault, QuantumVault]
+    [pallet_emission, Emission]
 );

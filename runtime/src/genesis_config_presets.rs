@@ -1,20 +1,19 @@
 // This file is part of Tesserax Protocol.
-// 
+//
 // Copyright (C) 2025 Minerva & Gemini (The Architect)
 // SPDX-License-Identifier: MIT-0
 
 //! Genesis configuration presets for Tesserax Protocol.
-//! 
+//!
 //! This module defines the initial state of the blockchain at genesis.
-//! 
+//!
 //! Key principles from Yellow Paper:
 //! - Total supply approaches S_max = 13,817,580 TSRX asymptotically
 //! - Genesis distributes only a portion (10%) for initial liquidity
 //! - Remaining supply is emitted over time via Sigmoid curve
 
 use crate::{
-    AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig,
-    tesserax_constants::DEV_ENDOWMENT,
+    tesserax_constants::DEV_ENDOWMENT, AccountId, BalancesConfig, RuntimeGenesisConfig, SudoConfig,
 };
 use alloc::{vec, vec::Vec};
 use frame_support::build_struct_json_patch;
@@ -27,20 +26,20 @@ use sp_keyring::Sr25519Keyring;
 /// ═══════════════════════════════════════════════════════════════════════════
 /// GENESIS CONFIGURATION
 /// ═══════════════════════════════════════════════════════════════════════════
-/// 
+///
 /// The genesis block is the foundation of Tesserax Protocol.
-/// 
+///
 /// Distribution Strategy (Development/Testnet):
 /// - Total Genesis Supply: ~1,381,758 TSRX (10% of max supply)
 /// - Distributed equally among development accounts
-/// 
+///
 /// For Mainnet:
 /// - Genesis supply should be minimal (for validators/founders)
 /// - Majority of tokens emitted via the Sigmoid emission curve
 /// ═══════════════════════════════════════════════════════════════════════════
 
 /// Build the genesis configuration for testnet/development networks.
-/// 
+///
 /// # Arguments
 /// * `initial_authorities` - BABE (Aura) and GRANDPA validator keypairs
 /// * `endowed_accounts` - Accounts that receive initial token allocation
@@ -66,10 +65,16 @@ fn tesserax_genesis(
                 .collect::<Vec<_>>(),
         },
         aura: pallet_aura::GenesisConfig {
-            authorities: initial_authorities.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
+            authorities: initial_authorities
+                .iter()
+                .map(|x| x.0.clone())
+                .collect::<Vec<_>>(),
         },
         grandpa: pallet_grandpa::GenesisConfig {
-            authorities: initial_authorities.iter().map(|x| (x.1.clone(), 1)).collect::<Vec<_>>(),
+            authorities: initial_authorities
+                .iter()
+                .map(|x| (x.1.clone(), 1))
+                .collect::<Vec<_>>(),
         },
         sudo: SudoConfig { key: Some(root) },
         // Note: pallet-emission is stateless - no genesis config needed
@@ -79,16 +84,16 @@ fn tesserax_genesis(
 /// ═══════════════════════════════════════════════════════════════════════════
 /// DEVELOPMENT CONFIGURATION
 /// ═══════════════════════════════════════════════════════════════════════════
-/// 
+///
 /// Single validator node for local development.
 /// Alice is both the validator and the sudo account.
-/// 
+///
 /// Endowed accounts:
 /// - Alice: ~345,435 TSRX (Developer / Validator)
 /// - Bob: ~345,435 TSRX (Tester)
 /// - AliceStash: ~345,435 TSRX (Staking reserve)
 /// - BobStash: ~345,435 TSRX (Staking reserve)
-/// 
+///
 /// Total: ~1,381,758 TSRX (10% of max supply: 13,817,580)
 /// ═══════════════════════════════════════════════════════════════════════════
 
@@ -114,10 +119,10 @@ pub fn development_config_genesis() -> Value {
 /// ═══════════════════════════════════════════════════════════════════════════
 /// LOCAL TESTNET CONFIGURATION
 /// ═══════════════════════════════════════════════════════════════════════════
-/// 
+///
 /// Multi-validator network for local testing.
 /// Alice and Bob are validators.
-/// 
+///
 /// All well-known keyring accounts are endowed.
 /// ═══════════════════════════════════════════════════════════════════════════
 
@@ -177,7 +182,7 @@ mod tests {
         // Verify π × e × φ ≈ 13.817422188
         // (3.141592653 × 2.718281828 × 1.618033988) / 10^18 ≈ 13.817422188
         let product = (PI as u128) * (E as u128) / PRECISION * (PHI as u128) / PRECISION;
-        
+
         // Should equal ~13_817_422_188 (13.817422188 × 10^9)
         assert!(product >= 13_800_000_000 && product <= 13_850_000_000);
 
@@ -188,7 +193,7 @@ mod tests {
     #[test]
     fn genesis_supply_is_ten_percent_of_max() {
         use crate::tesserax_constants::*;
-        
+
         // Genesis supply should be ~10% of max
         let expected_genesis = MAX_SUPPLY / 10;
         let diff = if GENESIS_SUPPLY > expected_genesis {
@@ -196,7 +201,7 @@ mod tests {
         } else {
             expected_genesis - GENESIS_SUPPLY
         };
-        
+
         // Allow 1% tolerance
         assert!(diff < MAX_SUPPLY / 100);
     }

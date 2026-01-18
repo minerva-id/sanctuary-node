@@ -21,7 +21,7 @@ pub type ChainSpec = sc_service::GenericChainSpec;
 /// ═══════════════════════════════════════════════════════════════════════════
 ///
 /// Configuration for single-node development environment.
-/// 
+///
 /// Features:
 /// - Single validator (Alice)
 /// - Instant block finality
@@ -56,7 +56,7 @@ pub fn development_chain_spec() -> Result<ChainSpec, String> {
 /// - All keyring accounts funded
 /// - Suitable for integration testing
 ///
-/// Usage: 
+/// Usage:
 /// - Node 1: `tesserax-node --chain local --alice`
 /// - Node 2: `tesserax-node --chain local --bob`
 /// ═══════════════════════════════════════════════════════════════════════════
@@ -79,7 +79,7 @@ pub fn local_chain_spec() -> Result<ChainSpec, String> {
 /// ═══════════════════════════════════════════════════════════════════════════
 ///
 /// Metadata properties exposed to wallets and block explorers.
-/// 
+///
 /// These properties tell Polkadot.js and other clients:
 /// - tokenSymbol: $TSRX
 /// - tokenDecimals: 18 (EVM compatible)

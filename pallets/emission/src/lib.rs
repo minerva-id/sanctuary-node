@@ -76,11 +76,10 @@ pub mod pallet {
     pub struct Pallet<T>(_);
 
     /// Configuration trait for the emission pallet.
-    /// 
+    ///
     /// Note: `RuntimeEvent: From<Event<Self>>` is automatically appended by the pallet macro.
     #[pallet::config]
     pub trait Config: frame_system::Config {
-
         /// Currency for reward distribution
         type Currency: Currency<Self::AccountId>;
 
@@ -149,16 +148,16 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         /// Called at the start of each block
-        /// 
+        ///
         /// This is where we mint and distribute block rewards
         fn on_initialize(block_number: BlockNumberFor<T>) -> Weight {
             // Convert block number to u32 for era calculation
             let block_num: u32 = block_number.try_into().unwrap_or(0);
-            
+
             // Calculate current era (0-indexed)
             // Era 0 = blocks 1-14400, Era 1 = blocks 14401-28800, etc.
             let current_era = block_num.saturating_sub(1) / BLOCKS_PER_ERA;
-            
+
             // Check if we're still within the emission schedule
             if (current_era as usize) >= TOTAL_ERAS {
                 // Emission has ended - check if bonus needs to be minted
@@ -170,7 +169,8 @@ pub mod pallet {
                     };
 
                     // Find the block author (or use first validator if not found)
-                    let digests: alloc::vec::Vec<(frame_support::ConsensusEngineId, &[u8])> = Default::default();
+                    let digests: alloc::vec::Vec<(frame_support::ConsensusEngineId, &[u8])> =
+                        Default::default();
                     let recipient = match T::FindAuthor::find_author(digests) {
                         Some(author) => author,
                         None => return T::WeightInfo::on_initialize_no_reward(),
@@ -226,7 +226,8 @@ pub mod pallet {
             // Find the block author (validator)
             // We use an empty iterator since we rely on the FindAuthor implementation
             // to determine the author from block digests
-            let digests: alloc::vec::Vec<(frame_support::ConsensusEngineId, &[u8])> = Default::default();
+            let digests: alloc::vec::Vec<(frame_support::ConsensusEngineId, &[u8])> =
+                Default::default();
             let author = match T::FindAuthor::find_author(digests) {
                 Some(a) => a,
                 None => return T::WeightInfo::on_initialize_no_reward(),
@@ -289,26 +290,24 @@ pub mod pallet {
         pub fn total_emitted(block_number: BlockNumberFor<T>) -> u128 {
             let block_num: u32 = block_number.try_into().unwrap_or(0);
             let current_era = Self::current_era(block_number) as usize;
-            
+
             let mut total: u128 = 0;
-            
+
             // Sum all complete eras
             for era in 0..current_era.min(TOTAL_ERAS) {
-                total = total.saturating_add(
-                    REWARD_SCHEDULE[era].saturating_mul(BLOCKS_PER_ERA as u128)
-                );
+                total = total
+                    .saturating_add(REWARD_SCHEDULE[era].saturating_mul(BLOCKS_PER_ERA as u128));
             }
-            
+
             // Add partial current era
             if current_era < TOTAL_ERAS {
-                let blocks_in_era = block_num.saturating_sub(
-                    (current_era as u32).saturating_mul(BLOCKS_PER_ERA)
-                );
+                let blocks_in_era =
+                    block_num.saturating_sub((current_era as u32).saturating_mul(BLOCKS_PER_ERA));
                 total = total.saturating_add(
-                    REWARD_SCHEDULE[current_era].saturating_mul(blocks_in_era as u128)
+                    REWARD_SCHEDULE[current_era].saturating_mul(blocks_in_era as u128),
                 );
             }
-            
+
             total
         }
     }

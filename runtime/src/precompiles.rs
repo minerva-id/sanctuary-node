@@ -30,13 +30,13 @@
 //! }
 //! ```
 
+use alloc::vec;
+use alloc::vec::Vec;
 use core::marker::PhantomData;
 use fp_evm::{
-    ExitError, ExitSucceed, Precompile, PrecompileFailure, PrecompileHandle,
-    PrecompileOutput, PrecompileResult,
+    ExitError, ExitSucceed, Precompile, PrecompileFailure, PrecompileHandle, PrecompileOutput,
+    PrecompileResult,
 };
-use alloc::vec::Vec;
-use alloc::vec;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -74,36 +74,36 @@ impl Precompile for VerifyStarkCommitment {
         // Get input length first, then copy
         let input_len = handle.input().len();
         let input: Vec<u8> = handle.input().to_vec();
-        
+
         // Calculate gas cost
-        let gas_cost = VERIFY_STARK_BASE_GAS
-            .saturating_add(input_len as u64 * VERIFY_STARK_PER_BYTE_GAS);
-        
+        let gas_cost =
+            VERIFY_STARK_BASE_GAS.saturating_add(input_len as u64 * VERIFY_STARK_PER_BYTE_GAS);
+
         handle.record_cost(gas_cost)?;
-        
+
         // Validate input length (minimum: vkey + commitment = 64 bytes)
         if input.len() < 64 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("Invalid input length".into()),
             });
         }
-        
+
         // Extract components
         let vkey_hash = &input[0..32];
         let public_commitment = &input[32..64];
         let proof_data = &input[64..];
-        
+
         // Verify the commitment
         // This performs a lightweight check that the proof structure is valid
         // Full verification happens on-chain via pallet-reml-verifier
         let valid = verify_commitment_structure(vkey_hash, public_commitment, proof_data);
-        
+
         // Return result (32 bytes, right-padded)
         let mut output = [0u8; 32];
         if valid {
             output[31] = 1; // 0x01 = valid
         }
-        
+
         Ok(PrecompileOutput {
             exit_status: ExitSucceed::Returned,
             output: output.to_vec(),
@@ -121,37 +121,39 @@ fn verify_commitment_structure(
     if vkey_hash.iter().all(|&b| b == 0) {
         return false;
     }
-    
+
     // Check that public commitment is not all zeros
     if public_commitment.iter().all(|&b| b == 0) {
         return false;
     }
-    
+
     // Minimum proof size
     if proof_data.len() < 32 {
         return false;
     }
-    
+
     // Check proof starts with valid version byte
     if proof_data[0] != 0x01 && proof_data[0] != 0x02 {
         // Allow v1 (STARK) or v2 (Groth16)
         return false;
     }
-    
+
     // Additional structure checks
     // The proof should contain the public commitment somewhere
     let mut found = false;
     for window in proof_data.windows(32) {
-        let matches: usize = window.iter()
+        let matches: usize = window
+            .iter()
             .zip(public_commitment.iter())
             .filter(|(a, b)| a == b)
             .count();
-        if matches >= 28 { // High correlation
+        if matches >= 28 {
+            // High correlation
             found = true;
             break;
         }
     }
-    
+
     found || proof_data.len() > 1000 // Allow large proofs as valid
 }
 
@@ -177,30 +179,30 @@ where
     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
         // Copy input first to avoid borrow issues
         let input: Vec<u8> = handle.input().to_vec();
-        
+
         handle.record_cost(IS_REQUEST_VERIFIED_GAS)?;
-        
+
         // Validate input length (8 bytes for u64)
         if input.len() < 8 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("Invalid request ID".into()),
             });
         }
-        
+
         // Parse request ID (little-endian)
         let mut bytes = [0u8; 8];
         bytes.copy_from_slice(&input[0..8]);
         let request_id = u64::from_le_bytes(bytes);
-        
+
         // Query pallet storage
         let is_verified = pallet_reml_verifier::Pallet::<Runtime>::is_request_verified(request_id);
-        
+
         // Return result (32 bytes, right-padded for EVM compatibility)
         let mut output = [0u8; 32];
         if is_verified {
             output[31] = 1;
         }
-        
+
         Ok(PrecompileOutput {
             exit_status: ExitSucceed::Returned,
             output: output.to_vec(),
@@ -231,35 +233,35 @@ where
     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
         // Copy input first
         let input: Vec<u8> = handle.input().to_vec();
-        
+
         handle.record_cost(GET_BATCH_INFO_GAS)?;
-        
+
         // Validate input length
         if input.len() < 8 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("Invalid batch ID".into()),
             });
         }
-        
+
         // Parse batch ID
         let mut bytes = [0u8; 8];
         bytes.copy_from_slice(&input[0..8]);
         let batch_id = u64::from_le_bytes(bytes);
-        
+
         // Query pallet storage
         let batch_info = pallet_reml_verifier::VerifiedBatches::<Runtime>::get(batch_id);
-        
+
         match batch_info {
             Some(info) => {
                 // Found - return batch info
                 let mut output = Vec::with_capacity(64);
-                
+
                 // Requests root (32 bytes)
                 output.extend_from_slice(&info.requests_root);
-                
+
                 // Signature count (4 bytes, big-endian)
                 output.extend_from_slice(&info.signature_count.to_be_bytes());
-                
+
                 // Block number - use raw encoded value (8 bytes)
                 // BlockNumber is typically u32 or u64, we'll encode as 8 bytes
                 let block_bytes = frame_support::pallet_prelude::Encode::encode(&info.verified_at);
@@ -267,12 +269,12 @@ where
                 let copy_len = block_bytes.len().min(8);
                 block_num_bytes[8 - copy_len..].copy_from_slice(&block_bytes[..copy_len]);
                 output.extend_from_slice(&block_num_bytes);
-                
+
                 // Pad to 64 bytes for EVM alignment
                 while output.len() < 64 {
                     output.push(0);
                 }
-                
+
                 Ok(PrecompileOutput {
                     exit_status: ExitSucceed::Returned,
                     output,
@@ -300,15 +302,15 @@ pub struct IsRequestVerifiedStandalone;
 impl Precompile for IsRequestVerifiedStandalone {
     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
         let input: Vec<u8> = handle.input().to_vec();
-        
+
         handle.record_cost(IS_REQUEST_VERIFIED_GAS)?;
-        
+
         if input.len() < 8 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("Invalid request ID".into()),
             });
         }
-        
+
         // In standalone mode, always return false
         // Real verification requires pallet access
         Ok(PrecompileOutput {
@@ -324,15 +326,15 @@ pub struct GetBatchInfoStandalone;
 impl Precompile for GetBatchInfoStandalone {
     fn execute(handle: &mut impl PrecompileHandle) -> PrecompileResult {
         let input: Vec<u8> = handle.input().to_vec();
-        
+
         handle.record_cost(GET_BATCH_INFO_GAS)?;
-        
+
         if input.len() < 8 {
             return Err(PrecompileFailure::Error {
                 exit_status: ExitError::Other("Invalid batch ID".into()),
             });
         }
-        
+
         // In standalone mode, return empty
         Ok(PrecompileOutput {
             exit_status: ExitSucceed::Returned,
@@ -348,7 +350,7 @@ impl Precompile for GetBatchInfoStandalone {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_verify_commitment_structure() {
         // Valid structure
@@ -360,23 +362,35 @@ mod tests {
             p.extend([0u8; 100]); // Padding
             p
         };
-        
+
         assert!(verify_commitment_structure(&vkey, &commitment, &proof));
-        
+
         // Invalid: zero vkey
         let zero_vkey = [0u8; 32];
-        assert!(!verify_commitment_structure(&zero_vkey, &commitment, &proof));
-        
+        assert!(!verify_commitment_structure(
+            &zero_vkey,
+            &commitment,
+            &proof
+        ));
+
         // Invalid: zero commitment
         let zero_commit = [0u8; 32];
         assert!(!verify_commitment_structure(&vkey, &zero_commit, &proof));
-        
+
         // Invalid: short proof
         let short_proof = vec![0x01; 16];
-        assert!(!verify_commitment_structure(&vkey, &commitment, &short_proof));
-        
+        assert!(!verify_commitment_structure(
+            &vkey,
+            &commitment,
+            &short_proof
+        ));
+
         // Invalid: wrong version
         let bad_version = vec![0x99; 64];
-        assert!(!verify_commitment_structure(&vkey, &commitment, &bad_version));
+        assert!(!verify_commitment_structure(
+            &vkey,
+            &commitment,
+            &bad_version
+        ));
     }
 }

@@ -27,14 +27,14 @@ extern crate alloc;
 pub use pallet::*;
 
 #[cfg(test)]
-mod mock;
-
+// TODO: Add mock.rs for testing
+// mod mock;
 #[cfg(test)]
-mod tests;
-
+// TODO: Add tests.rs for unit tests
+// mod tests;
 #[cfg(feature = "runtime-benchmarks")]
-mod benchmarking;
-
+// TODO: Add benchmarking.rs for benchmarks
+// mod benchmarking;
 pub mod weights;
 pub use weights::*;
 
@@ -106,24 +106,14 @@ pub mod pallet {
     /// Verified batch IDs and their metadata
     #[pallet::storage]
     #[pallet::getter(fn verified_batches)]
-    pub type VerifiedBatches<T: Config> = StorageMap<
-        _,
-        Twox64Concat,
-        u64,
-        BatchInfo<T::AccountId, BlockNumberFor<T>>,
-        OptionQuery,
-    >;
+    pub type VerifiedBatches<T: Config> =
+        StorageMap<_, Twox64Concat, u64, BatchInfo<T::AccountId, BlockNumberFor<T>>, OptionQuery>;
 
     /// Individual request verification status
     #[pallet::storage]
     #[pallet::getter(fn verified_requests)]
-    pub type VerifiedRequests<T: Config> = StorageMap<
-        _,
-        Twox64Concat,
-        u64,
-        (u64, BlockNumberFor<T>),
-        OptionQuery,
-    >;
+    pub type VerifiedRequests<T: Config> =
+        StorageMap<_, Twox64Concat, u64, (u64, BlockNumberFor<T>), OptionQuery>;
 
     /// Total number of proofs verified
     #[pallet::storage]
@@ -137,13 +127,8 @@ pub mod pallet {
 
     /// Proof commitment storage (for replay prevention)
     #[pallet::storage]
-    pub type ProofCommitments<T: Config> = StorageMap<
-        _,
-        Blake2_128Concat,
-        H256,
-        BlockNumberFor<T>,
-        OptionQuery,
-    >;
+    pub type ProofCommitments<T: Config> =
+        StorageMap<_, Blake2_128Concat, H256, BlockNumberFor<T>, OptionQuery>;
 
     // ═══════════════════════════════════════════════════════════════════════
     // TYPES
@@ -193,7 +178,9 @@ pub mod pallet {
     }
 
     /// Proof rejection reason
-    #[derive(Clone, Debug, PartialEq, Eq, Encode, Decode, DecodeWithMemTracking, TypeInfo, MaxEncodedLen)]
+    #[derive(
+        Clone, Debug, PartialEq, Eq, Encode, Decode, DecodeWithMemTracking, TypeInfo, MaxEncodedLen,
+    )]
     pub enum RejectReason {
         InvalidProofFormat,
         InvalidVKeyHash,
@@ -211,8 +198,12 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        AggregatorRegistered { aggregator: T::AccountId },
-        AggregatorDeactivated { aggregator: T::AccountId },
+        AggregatorRegistered {
+            aggregator: T::AccountId,
+        },
+        AggregatorDeactivated {
+            aggregator: T::AccountId,
+        },
         ProofVerified {
             batch_id: u64,
             aggregator: T::AccountId,
@@ -258,20 +249,23 @@ pub mod pallet {
             aggregator: T::AccountId,
         ) -> DispatchResult {
             ensure_root(origin)?;
-            
+
             ensure!(
                 !Aggregators::<T>::contains_key(&aggregator),
                 Error::<T>::AggregatorAlreadyRegistered
             );
-            
+
             let current_block = frame_system::Pallet::<T>::block_number();
-            
-            Aggregators::<T>::insert(&aggregator, AggregatorInfo {
-                registered_at: current_block,
-                proofs_submitted: 0,
-                active: true,
-            });
-            
+
+            Aggregators::<T>::insert(
+                &aggregator,
+                AggregatorInfo {
+                    registered_at: current_block,
+                    proofs_submitted: 0,
+                    active: true,
+                },
+            );
+
             Self::deposit_event(Event::AggregatorRegistered { aggregator });
             Ok(())
         }
@@ -284,13 +278,13 @@ pub mod pallet {
             aggregator: T::AccountId,
         ) -> DispatchResult {
             ensure_root(origin)?;
-            
+
             Aggregators::<T>::try_mutate(&aggregator, |maybe_info| -> DispatchResult {
                 let info = maybe_info.as_mut().ok_or(Error::<T>::AggregatorNotFound)?;
                 info.active = false;
                 Ok(())
             })?;
-            
+
             Self::deposit_event(Event::AggregatorDeactivated { aggregator });
             Ok(())
         }
@@ -298,23 +292,20 @@ pub mod pallet {
         /// Submit and verify a STARK proof
         #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::submit_proof(submission.public_values.verified_request_ids.len() as u32))]
-        pub fn submit_proof(
-            origin: OriginFor<T>,
-            submission: ProofSubmission,
-        ) -> DispatchResult {
+        pub fn submit_proof(origin: OriginFor<T>, submission: ProofSubmission) -> DispatchResult {
             let aggregator = ensure_signed(origin)?;
-            
+
             // Check authorization
-            let mut aggregator_info = Aggregators::<T>::get(&aggregator)
-                .ok_or(Error::<T>::NotAuthorized)?;
+            let mut aggregator_info =
+                Aggregators::<T>::get(&aggregator).ok_or(Error::<T>::NotAuthorized)?;
             ensure!(aggregator_info.active, Error::<T>::NotAuthorized);
-            
+
             // Validate batch not already verified
             ensure!(
                 !VerifiedBatches::<T>::contains_key(submission.batch_id),
                 Error::<T>::BatchAlreadyVerified
             );
-            
+
             // Validate public values
             ensure!(
                 submission.public_values.version == REML_VERSION,
@@ -328,7 +319,7 @@ pub mod pallet {
                 submission.public_values.batch_id == submission.batch_id,
                 Error::<T>::InvalidPublicValues
             );
-            
+
             // Verify VKey hash
             let expected_vkey = T::ExpectedVKeyHash::get();
             if expected_vkey != [0u8; 32] {
@@ -337,33 +328,34 @@ pub mod pallet {
                     Error::<T>::InvalidVKeyHash
                 );
             }
-            
+
             // Compute proof commitment for replay prevention
             let proof_commitment = Self::compute_proof_commitment(&submission);
             let commitment_hash = H256::from_slice(&proof_commitment);
-            
+
             ensure!(
                 !ProofCommitments::<T>::contains_key(commitment_hash),
                 Error::<T>::ProofAlreadyUsed
             );
-            
+
             // Verify merkle root matches claimed request IDs
-            let computed_root = Self::compute_merkle_root(&submission.public_values.verified_request_ids);
+            let computed_root =
+                Self::compute_merkle_root(&submission.public_values.verified_request_ids);
             ensure!(
                 computed_root == submission.public_values.requests_root,
                 Error::<T>::InvalidMerkleRoot
             );
-            
+
             // ═══════════════════════════════════════════════════════════════
             // STARK PROOF VERIFICATION
             // ═══════════════════════════════════════════════════════════════
-            
+
             let proof_valid = Self::verify_sp1_proof(
                 &submission.proof,
                 &submission.public_values,
                 &submission.vkey_hash,
             );
-            
+
             if !proof_valid {
                 Self::deposit_event(Event::ProofRejected {
                     batch_id: submission.batch_id,
@@ -372,49 +364,49 @@ pub mod pallet {
                 });
                 return Err(Error::<T>::ProofVerificationFailed.into());
             }
-            
+
             // ═══════════════════════════════════════════════════════════════
             // UPDATE STORAGE
             // ═══════════════════════════════════════════════════════════════
-            
+
             let current_block = frame_system::Pallet::<T>::block_number();
-            
+
             // Store proof commitment
             ProofCommitments::<T>::insert(commitment_hash, current_block);
-            
+
             // Store batch info
-            VerifiedBatches::<T>::insert(submission.batch_id, BatchInfo {
-                aggregator: aggregator.clone(),
-                verified_at: current_block,
-                signature_count: submission.public_values.verified_count,
-                requests_root: submission.public_values.requests_root,
-                proof_commitment,
-            });
-            
+            VerifiedBatches::<T>::insert(
+                submission.batch_id,
+                BatchInfo {
+                    aggregator: aggregator.clone(),
+                    verified_at: current_block,
+                    signature_count: submission.public_values.verified_count,
+                    requests_root: submission.public_values.requests_root,
+                    proof_commitment,
+                },
+            );
+
             // Mark requests as verified
             for request_id in submission.public_values.verified_request_ids.iter() {
-                VerifiedRequests::<T>::insert(
-                    request_id,
-                    (submission.batch_id, current_block),
-                );
+                VerifiedRequests::<T>::insert(request_id, (submission.batch_id, current_block));
             }
-            
+
             // Update stats
             aggregator_info.proofs_submitted += 1;
             Aggregators::<T>::insert(&aggregator, aggregator_info);
-            
+
             TotalProofsVerified::<T>::mutate(|n| *n += 1);
             TotalSignaturesVerified::<T>::mutate(|n| {
                 *n += submission.public_values.verified_count as u64
             });
-            
+
             Self::deposit_event(Event::ProofVerified {
                 batch_id: submission.batch_id,
                 aggregator,
                 signature_count: submission.public_values.verified_count,
                 block_number: current_block,
             });
-            
+
             Ok(())
         }
     }
@@ -444,38 +436,41 @@ pub mod pallet {
         /// Compute proof commitment hash
         fn compute_proof_commitment(submission: &ProofSubmission) -> [u8; 32] {
             use sp_core::blake2_256;
-            
+
             // Hash: vkey || batch_id || requests_root || proof_hash
             let proof_hash = blake2_256(&submission.proof);
-            
+
             let mut data = [0u8; 32 + 8 + 32 + 32];
             data[..32].copy_from_slice(&submission.vkey_hash);
             data[32..40].copy_from_slice(&submission.batch_id.to_le_bytes());
             data[40..72].copy_from_slice(&submission.public_values.requests_root);
             data[72..104].copy_from_slice(&proof_hash);
-            
+
             blake2_256(&data)
         }
 
         /// Compute merkle root from request IDs
         fn compute_merkle_root(ids: &[u64]) -> [u8; 32] {
             use sp_core::blake2_256;
-            
+
             if ids.is_empty() {
                 return [0u8; 32];
             }
-            
+
             // Hash leaves
-            let mut leaves: alloc::vec::Vec<[u8; 32]> = ids.iter().map(|id| {
-                let mut leaf = [0u8; 32];
-                leaf[..8].copy_from_slice(&id.to_le_bytes());
-                blake2_256(&leaf)
-            }).collect();
-            
+            let mut leaves: alloc::vec::Vec<[u8; 32]> = ids
+                .iter()
+                .map(|id| {
+                    let mut leaf = [0u8; 32];
+                    leaf[..8].copy_from_slice(&id.to_le_bytes());
+                    blake2_256(&leaf)
+                })
+                .collect();
+
             // Build tree
             while leaves.len() > 1 {
                 let mut next = alloc::vec::Vec::with_capacity((leaves.len() + 1) / 2);
-                
+
                 for i in (0..leaves.len()).step_by(2) {
                     if i + 1 < leaves.len() {
                         let mut combined = [0u8; 64];
@@ -486,10 +481,10 @@ pub mod pallet {
                         next.push(leaves[i]);
                     }
                 }
-                
+
                 leaves = next;
             }
-            
+
             leaves[0]
         }
 
@@ -519,54 +514,54 @@ pub mod pallet {
             // Current implementation verifies structure and commitments.
             // Full verification requires SP1 verifier contract integration.
             // ═══════════════════════════════════════════════════════════════
-            
+
             // Check minimum proof size
             if proof.len() < MIN_PROOF_SIZE && proof.len() != GROTH16_PROOF_SIZE {
                 return false;
             }
-            
+
             // Verify public values are non-zero
             if public_values.verified_count == 0 {
                 return false;
             }
-            
+
             // Verify request count matches list
             if public_values.verified_count as usize != public_values.verified_request_ids.len() {
                 return false;
             }
-            
+
             // Verify proof contains expected commitments
             // SP1 proofs start with a version byte and contain vkey commitment
             if proof.len() >= 33 {
                 // Check for expected proof structure
                 let version_byte = proof[0];
                 if version_byte != 0x01 && version_byte != 0x02 { // STARK or Groth16
-                    // Allow any version for testnet
+                     // Allow any version for testnet
                 }
-                
+
                 // Verify vkey is embedded in proof (at offset 1-33 typically)
                 // This is a simplified check - full verification would parse proof structure
                 let _embedded_commitment = &proof[1..33.min(proof.len())];
-                
+
                 // Hash should relate to vkey
                 use sp_core::blake2_256;
                 let vkey_commitment = blake2_256(vkey_hash);
-                
+
                 // For compressed proofs, vkey is incorporated differently
                 // Accept if vkey commitment appears in first 256 bytes
                 let mut found_commitment = false;
                 for i in 0..proof.len().saturating_sub(32) {
-                    if proof[i..i+32] == vkey_commitment[..] {
+                    if proof[i..i + 32] == vkey_commitment[..] {
                         found_commitment = true;
                         break;
                     }
                 }
-                
+
                 // For testnet, don't require exact commitment match
                 // In production, this would fail if commitment not found
                 let _ = found_commitment;
             }
-            
+
             // Verify public values encoding is in proof
             // The proof should commit to the public values
             use sp_core::blake2_256;
@@ -579,37 +574,38 @@ pub mod pallet {
                 data.extend_from_slice(&public_values.requests_root);
                 blake2_256(&data)
             };
-            
+
             // Check if proof contains or commits to public values
             // In real SP1 proofs, public values are cryptographically bound
             let mut valid_public_binding = false;
-            
+
             // Simple check: public hash should appear or be derivable from proof
             for i in 0..proof.len().saturating_sub(32) {
-                let window = &proof[i..i+32];
-                
+                let window = &proof[i..i + 32];
+
                 // Direct match
                 if window == public_hash {
                     valid_public_binding = true;
                     break;
                 }
-                
+
                 // XOR check (common compression technique)
                 let xored: [u8; 32] = core::array::from_fn(|j| window[j] ^ public_hash[j]);
                 let zero_count = xored.iter().filter(|&&b| b == 0).count();
-                if zero_count >= 28 { // High correlation
+                if zero_count >= 28 {
+                    // High correlation
                     valid_public_binding = true;
                     break;
                 }
             }
-            
+
             // For testnet with generated test proofs, allow if structure is valid
             // In production, valid_public_binding must be true
             if !valid_public_binding && proof.len() < 1000 {
                 // Small proofs must have valid binding
                 return false;
             }
-            
+
             true
         }
     }
