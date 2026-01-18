@@ -223,7 +223,7 @@ use sp_core::{H160, U256};
 use core::marker::PhantomData;
 use sp_runtime::Permill;
 
-/// Tesserax Chain ID: 13817 (derived from floor(π × e × φ × 10^6) = 13,817,422)
+/// Tesserax Chain ID: 13817 (derived from floor(π × e × φ × 10^6) = 13,817,580)
 pub const CHAIN_ID: u64 = 13817;
 
 /// Block gas limit
@@ -313,7 +313,13 @@ where
 	}
 }
 
-/// Standard Ethereum precompiles
+/// Tesserax Precompiles including ZK-Coprocessor for Re-ML verification
+///
+/// Addresses:
+/// - 0x01-0x05: Standard Ethereum precompiles
+/// - 0x20: Verify STARK commitment (lightweight check)
+/// - 0x21: Check if request ID is verified via Re-ML
+/// - 0x22: Get batch information
 pub struct TesseraxPrecompiles<R>(PhantomData<R>);
 
 impl<R> TesseraxPrecompiles<R>
@@ -324,13 +330,38 @@ where
 		Self(PhantomData)
 	}
 
-	pub fn used_addresses() -> [H160; 5] {
+	/// Standard Ethereum precompile addresses (1-5)
+	pub fn standard_addresses() -> [H160; 5] {
 		[
 			hash(1),  // ECRecover
 			hash(2),  // Sha256
 			hash(3),  // Ripemd160
 			hash(4),  // Identity
 			hash(5),  // Modexp
+		]
+	}
+
+	/// ZK-Coprocessor precompile addresses (0x20-0x22)
+	pub fn zk_addresses() -> [H160; 3] {
+		[
+			hash(0x20),  // VerifyStarkCommitment
+			hash(0x21),  // IsRequestVerified
+			hash(0x22),  // GetBatchInfo
+		]
+	}
+
+	pub fn used_addresses() -> [H160; 8] {
+		[
+			// Standard Ethereum precompiles
+			hash(1),  // ECRecover
+			hash(2),  // Sha256
+			hash(3),  // Ripemd160
+			hash(4),  // Identity
+			hash(5),  // Modexp
+			// ZK-Coprocessor precompiles (Re-ML)
+			hash(0x20),  // VerifyStarkCommitment
+			hash(0x21),  // IsRequestVerified
+			hash(0x22),  // GetBatchInfo
 		]
 	}
 }
@@ -351,10 +382,18 @@ fn hash(a: u64) -> H160 {
 
 impl<R> PrecompileSet for TesseraxPrecompiles<R>
 where
-	R: pallet_evm::Config,
+	R: pallet_evm::Config + pallet_reml_verifier::Config,
 {
 	fn execute(&self, handle: &mut impl PrecompileHandle) -> Option<PrecompileResult> {
+		use crate::precompiles::{
+			VerifyStarkCommitment, IsRequestVerified, GetBatchInfo
+		};
+
 		match handle.code_address() {
+			// ═══════════════════════════════════════════════════════════════
+			// STANDARD ETHEREUM PRECOMPILES (0x01 - 0x05)
+			// ═══════════════════════════════════════════════════════════════
+			
 			// ECRecover
 			a if a == hash(1) => Some(pallet_evm_precompile_simple::ECRecover::execute(handle)),
 			// Sha256
@@ -365,6 +404,19 @@ where
 			a if a == hash(4) => Some(pallet_evm_precompile_simple::Identity::execute(handle)),
 			// Modexp
 			a if a == hash(5) => Some(pallet_evm_precompile_modexp::Modexp::execute(handle)),
+
+			// ═══════════════════════════════════════════════════════════════
+			// ZK-COPROCESSOR PRECOMPILES (0x20 - 0x22)
+			// Re-ML STARK Verification for Quantum-Safe Smart Contracts
+			// ═══════════════════════════════════════════════════════════════
+			
+			// Verify STARK proof commitment structure
+			a if a == hash(0x20) => Some(VerifyStarkCommitment::execute(handle)),
+			// Check if a specific request ID has been verified via Re-ML
+			a if a == hash(0x21) => Some(IsRequestVerified::<R>::execute(handle)),
+			// Get verified batch information
+			a if a == hash(0x22) => Some(GetBatchInfo::<R>::execute(handle)),
+
 			_ => None,
 		}
 	}
@@ -515,3 +567,46 @@ impl pallet_quantum_vault::Config for Runtime {
 	type TreasuryAccount = TreasuryAccountId;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// RE-ML VERIFIER CONFIGURATION
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Recursive-STARK ML-DSA Verification (Post-Quantum Signature Aggregation)
+// 
+// This pallet verifies STARK proofs that attest to batches of ML-DSA signatures.
+// Aggregators generate proofs off-chain using SP1 zkVM, then submit them here.
+//
+// Features:
+// - Aggregator authorization and management
+// - STARK proof verification
+// - Request ID tracking for verified signatures
+// - Integration with Quantum Vault for transfer authorization
+// ═══════════════════════════════════════════════════════════════════════════
+
+parameter_types! {
+	/// Maximum number of authorized aggregators
+	/// Smaller number = tighter control, larger = more decentralization
+	pub const MaxAggregators: u32 = 16;
+	
+	/// Expected verification key hash for the Re-ML guest program
+	/// This ensures only proofs from the correct SP1 program are accepted
+	/// 
+	/// Development Mode: [0u8; 32] accepts any vkey for testing
+	/// Production Mode: Set to actual vkey hash from `reml-prover vkey-hash`
+	/// 
+	/// To get the production vkey hash:
+	/// 1. Build guest: `cd reml && cargo prove build`
+	/// 2. Get hash: `cargo run --bin reml-prover -- vkey-hash`
+	/// 3. Replace the value below with the output
+	pub ExpectedVKeyHash: [u8; 32] = {
+		// Development/Testnet: Accept any vkey for testing
+		// For production, replace with actual vkey hash bytes
+		[0u8; 32]
+	};
+}
+
+impl pallet_reml_verifier::Config for Runtime {
+	type WeightInfo = pallet_reml_verifier::weights::SubstrateWeight<Self>;
+	type MaxAggregators = MaxAggregators;
+	type ExpectedVKeyHash = ExpectedVKeyHash;
+}

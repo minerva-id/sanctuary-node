@@ -8,8 +8,18 @@
 [![Built with Substrate](https://img.shields.io/badge/Built%20with-Substrate-e6007a)](https://substrate.io/)
 [![EVM Compatible](https://img.shields.io/badge/EVM-Compatible-3C3C3D)](https://ethereum.org/)
 [![Quantum Ready](https://img.shields.io/badge/Quantum-Resistant-00D4AA)](https://csrc.nist.gov/projects/post-quantum-cryptography)
-[![Tests](https://img.shields.io/badge/Tests-51%20Passing-success)](docs/test-results.md)
+[![Tests](https://img.shields.io/badge/Tests-73%20Passing-success)](docs/test-results.md)
 [![Testnet](https://img.shields.io/badge/Testnet-Live-brightgreen)](docs/testnet-guide.md)
+
+[![GitHub Stars](https://img.shields.io/github/stars/Tesserax-Protocol/tesserax-node?style=social)](https://github.com/Tesserax-Protocol/tesserax-node)
+[![GitHub Forks](https://img.shields.io/github/forks/Tesserax-Protocol/tesserax-node?style=social)](https://github.com/Tesserax-Protocol/tesserax-node/fork)
+[![Contributors](https://img.shields.io/github/contributors/Tesserax-Protocol/tesserax-node)](https://github.com/Tesserax-Protocol/tesserax-node/graphs/contributors)
+
+[Website](https://tesserax.network) • 
+[Documentation](docs/) • 
+[Testnet](docs/testnet-guide.md) • 
+[Contributing](CONTRIBUTING.md) • 
+[Security](SECURITY.md)
 
 </div>
 
@@ -29,7 +39,7 @@ Tesserax Protocol is a next-generation blockchain built on Substrate, featuring:
 
 The maximum supply of $TSRX is derived from universal mathematical constants:
 
-$$S_{max} = \lfloor \pi \times e \times \phi \times 10^6 \rfloor = 13,817,422 \text{ TSRX}$$
+$$S_{max} = \lfloor \pi \times e \times \phi \times 10^6 \rfloor = 13,817,580 \text{ TSRX}$$
 
 Where:
 - **π** (Pi) ≈ 3.14159... — Represents cycles

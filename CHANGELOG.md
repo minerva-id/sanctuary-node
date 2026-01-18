@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [3.0.0] - 2026-01-15 (Re-ML Integration)
+
+### 🎉 Highlights
+
+This release introduces **Re-ML (Recursive-STARK ML-DSA)**, a novel architecture for compressing post-quantum signatures using Zero-Knowledge proofs.
+
+### Added
+
+#### Re-ML System
+- **reml/lib** - Shared types for signature requests, proof inputs/outputs, and bundles
+- **reml/guest** - SP1 zkVM program that verifies ML-DSA signatures in zero-knowledge
+- **reml/host** - CLI prover/aggregator for generating STARK proofs
+- **pallet-reml-verifier** - On-chain verification of STARK proofs with aggregator registry
+- **ZK-Coprocessor Precompiles** - EVM integration for verifying proofs from smart contracts (0x20, 0x21, 0x22)
+
+#### Features
+- Batch ML-DSA signature verification (up to 256 signatures per proof)
+- STARK proof generation using SP1 zkVM
+- Aggregator authorization and management
+- Request ID tracking for verified signatures
+- Integration hooks for Quantum Vault transfers
+- Direct Solidity interface for Re-ML proof verification (`contracts/ReMLVerifier.sol`)
+
+#### Documentation
+- Updated whitepaper to v3.0 with Re-ML architecture
+- Comprehensive Re-ML.md technical explanation
+- reml/README.md with usage guide and performance benchmarks
+
+### Architecture
+
+```
+User (ML-DSA Sig) → Aggregator → SP1 Prover → STARK Proof → On-Chain Verifier
+                                     ↓
+                              ~24x Compression
+                          (2.4MB → ~100KB for 1000 sigs)
+```
+
+### Technical Details
+
+| Component | Technology | Status |
+|-----------|------------|--------|
+| zkVM | SP1 (Succinct Labs) | ✅ Integrated |
+| Guest Verification | Full ML-DSA (Dilithium2) | ✅ Complete |
+| On-Chain Verifier | Substrate Pallet | ✅ Complete |
+| ZK-Coprocessor | EVM Precompiles | ✅ Complete |
+| STARK Verification | SP1 Verifier + Precompile | ✅ Complete |
+
+### Security Notes
+
+- Aggregators cannot forge signatures (zkVM cryptographic guarantee)
+- Proofs are tied to verification key hash for program integrity
+- Request IDs ensure idempotent verification
+
+---
+
 ## [2.0.0] - 2026-01-03 (Testnet Launch)
 
 ### 🎉 Highlights
@@ -16,7 +71,7 @@ This release marks the **public testnet launch** of Tesserax Protocol with full 
 ### Added
 
 #### Core Features
-- **Sigmoid Emission Curve** - Pre-computed 20-year emission schedule with 13,817,422 TSRX max supply
+- **Sigmoid Emission Curve** - Pre-computed 20-year emission schedule with 13,817,580 TSRX max supply
 - **Quantum Vault** - Post-quantum cryptographic cold storage using CRYSTALS-Dilithium Level 2
 - **EVM Compatibility** - Full Ethereum Virtual Machine support via Frontier integration
 - **CheckVaultTransfer** - Transaction extension to block standard transfers from vault accounts
@@ -46,7 +101,7 @@ This release marks the **public testnet launch** of Tesserax Protocol with full 
 
 - **Token Symbol**: Changed from SANC to TSRX
 - **Project Name**: Rebranded from Sanctuary to Tesserax
-- **MAX_SUPPLY**: Harmonized to 13,817,422 TSRX (π × e × φ × 10^6)
+- **MAX_SUPPLY**: Harmonized to 13,817,580 TSRX (π × e × φ × 10^6)
 - **CI Workflow**: Updated to use tesserax-node naming
 
 ### Fixed

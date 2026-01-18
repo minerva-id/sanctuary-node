@@ -60,7 +60,7 @@ The emission pallet manages the sigmoid emission schedule for TSRX token distrib
 
 | Constant | Type | Value | Description |
 |----------|------|-------|-------------|
-| `MAX_SUPPLY` | `u128` | 13,817,422 × 10^18 | Maximum token supply in planck |
+| `MAX_SUPPLY` | `u128` | 13,817,580 × 10^18 | Maximum token supply in planck |
 | `TOTAL_ERAS` | `usize` | 7,300 | Total eras in emission schedule |
 | `BLOCKS_PER_ERA` | `u32` | 14,400 | Blocks per era (~24 hours) |
 

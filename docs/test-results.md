@@ -40,7 +40,7 @@ The emission pallet implements Tesserax's deterministic sigmoid emission curve.
 | `test_emission_across_eras` | Era transitions work correctly | ✅ |
 | `test_is_emission_ended` | Detects end of 20-year schedule | ✅ |
 | `test_total_emitted_calculation` | Cumulative emission tracking | ✅ |
-| `test_max_supply_helper` | MAX_SUPPLY = 13,817,422 TSRX | ✅ |
+| `test_max_supply_helper` | MAX_SUPPLY = 13,817,580 TSRX | ✅ |
 | `test_total_eras_helper` | TOTAL_ERAS = 7,300 | ✅ |
 | `test_sigmoid_curve_shape` | Peak at mid-point, symmetric | ✅ |
 | `test_reward_schedule_non_zero` | All eras have positive rewards | ✅ |

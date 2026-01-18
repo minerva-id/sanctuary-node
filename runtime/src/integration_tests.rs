@@ -29,8 +29,8 @@ fn integration_tesserax_constants_are_correct() {
 	assert_eq!(tesserax_constants::PRECISION, 1_000_000_000);
 	
 	// Verify the Tesserax Constant calculation
-	// π × e × φ × 10^6 ≈ 13,817,422
-	assert_eq!(tesserax_constants::MAX_SUPPLY_UNITS, 13_817_422);
+	// π × e × φ × 10^6 ≈ 13,817,580
+	assert_eq!(tesserax_constants::MAX_SUPPLY_UNITS, 13_817_580);
 }
 
 #[test]
@@ -41,10 +41,10 @@ fn integration_token_constants() {
 	assert_eq!(tesserax_constants::TOKEN_NAME, "Tesserax");
 	
 	// Verify MAX_SUPPLY in planck (smallest unit)
-	// 13,817,422 × 10^18 = 13,817,422,000,000,000,000,000,000
+	// 13,817,580 × 10^18 = 13,817,580,000,000,000,000,000,000
 	assert_eq!(
 		tesserax_constants::MAX_SUPPLY,
-		13_817_422_000_000_000_000_000_000u128
+		13_817_580_000_000_000_000_000_000u128
 	);
 }
 
@@ -70,7 +70,7 @@ fn integration_genesis_supply_is_10_percent() {
 	let max_supply = tesserax_constants::MAX_SUPPLY;
 	let genesis_supply = tesserax_constants::GENESIS_SUPPLY;
 	
-	// 10% of 13,817,422 = 1,381,742.2
+	// 10% of 13,817,580 = 1,381,758
 	let expected_10_percent = max_supply / 10;
 	
 	// Allow for small rounding difference (within 1 TSRX)
@@ -105,7 +105,7 @@ fn integration_dev_endowment_distribution() {
 #[test]
 fn integration_evm_chain_id() {
 	// Chain ID should be derived from Tesserax Constant
-	// 13817 = floor(13,817,422 / 1000)
+	// 13817 = floor(13,817,580 / 1000)
 	assert_eq!(configs::CHAIN_ID, 13817);
 }
 

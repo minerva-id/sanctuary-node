@@ -8,7 +8,7 @@
 //! This module defines the initial state of the blockchain at genesis.
 //! 
 //! Key principles from Yellow Paper:
-//! - Total supply approaches S_max = 13,817,422 TSRX asymptotically
+//! - Total supply approaches S_max = 13,817,580 TSRX asymptotically
 //! - Genesis distributes only a portion (10%) for initial liquidity
 //! - Remaining supply is emitted over time via Sigmoid curve
 
@@ -31,7 +31,7 @@ use sp_keyring::Sr25519Keyring;
 /// The genesis block is the foundation of Tesserax Protocol.
 /// 
 /// Distribution Strategy (Development/Testnet):
-/// - Total Genesis Supply: ~1,381,742 TSRX (10% of max supply)
+/// - Total Genesis Supply: ~1,381,758 TSRX (10% of max supply)
 /// - Distributed equally among development accounts
 /// 
 /// For Mainnet:
@@ -89,7 +89,7 @@ fn tesserax_genesis(
 /// - AliceStash: ~345,435 TSRX (Staking reserve)
 /// - BobStash: ~345,435 TSRX (Staking reserve)
 /// 
-/// Total: ~1,381,742 TSRX (10% of max supply: 13,817,422)
+/// Total: ~1,381,758 TSRX (10% of max supply: 13,817,580)
 /// ═══════════════════════════════════════════════════════════════════════════
 
 pub fn development_config_genesis() -> Value {
@@ -181,8 +181,8 @@ mod tests {
         // Should equal ~13_817_422_188 (13.817422188 × 10^9)
         assert!(product >= 13_800_000_000 && product <= 13_850_000_000);
 
-        // Max supply should be 13,817,422
-        assert_eq!(MAX_SUPPLY_UNITS, 13_817_422);
+        // Max supply should be 13,817,580
+        assert_eq!(MAX_SUPPLY_UNITS, 13_817_580);
     }
 
     #[test]

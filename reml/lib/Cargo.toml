@@ -1,0 +1,16 @@
+[package]
+name = "reml-lib"
+description = "Shared types and constants for Re-ML (Recursive-STARK ML-DSA)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+pqcrypto-dilithium = { workspace = true, optional = true }
+pqcrypto-traits = { workspace = true, optional = true }
+
+[features]
+default = []
+# Enable full crypto for host-side operations
+full-crypto = ["pqcrypto-dilithium", "pqcrypto-traits"]

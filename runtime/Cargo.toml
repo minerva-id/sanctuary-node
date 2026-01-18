@@ -60,6 +60,7 @@ pallet-transaction-payment.workspace = true
 pallet-template.workspace = true
 pallet-emission.workspace = true
 pallet-quantum-vault.workspace = true
+pallet-reml-verifier.workspace = true
 
 # ═══════════════════════════════════════════════════════════════════════════
 # FRONTIER EVM
@@ -131,6 +132,7 @@ std = [
 	"pallet-template/std",
 	"pallet-emission/std",
 	"pallet-quantum-vault/std",
+	"pallet-reml-verifier/std",
 	# Frontier EVM
 	"pallet-evm/std",
 	"pallet-ethereum/std",
@@ -159,6 +161,7 @@ runtime-benchmarks = [
 	"pallet-template/runtime-benchmarks",
 	"pallet-emission/runtime-benchmarks",
 	"pallet-quantum-vault/runtime-benchmarks",
+	"pallet-reml-verifier/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"pallet-transaction-payment/runtime-benchmarks",
 	"pallet-evm/runtime-benchmarks",
@@ -177,6 +180,7 @@ try-runtime = [
 	"pallet-sudo/try-runtime",
 	"pallet-template/try-runtime",
 	"pallet-emission/try-runtime",
+	"pallet-reml-verifier/try-runtime",
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
 	"pallet-evm/try-runtime",

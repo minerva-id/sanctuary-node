@@ -111,7 +111,7 @@ PI  = 3.1415926535
 E   = 2.7182818284
 PHI = 1.6180339887
 
-# Target Supply: ~13,817,422
+# Target Supply: ~13,817,580
 S_MAX = int(math.floor(PI * E * PHI * 1_000_000)) * (10**18) 
 
 # Durasi Emisi (misal: kurva melandai penuh di 20 tahun)
